@@ -43,9 +43,8 @@ function HomeContent() {
         setCookie('user_name', userData.name, { expires: 1 });  // 1 day
 
         // if code is not valid, throw an error
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to authenticate with Box');
+        if (!userData.ok) {
+          throw new Error(userData.error || 'Failed to authenticate with Box');
         }
         
         // Redirect to main page
