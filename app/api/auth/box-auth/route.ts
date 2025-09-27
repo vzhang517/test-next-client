@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BoxClient, BoxOAuth, OAuthConfig} from 'box-typescript-sdk-gen';
+import {ConsoleLogger} from '@aws-amplify/core';
+const logger = new ConsoleLogger('test');
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    logger.info('body:', body);
+    console.log('body:', body);
     const authCode = body.auth_code;
 
     if (!authCode) {
