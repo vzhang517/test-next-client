@@ -2,12 +2,13 @@
   "name": "state-street-cursor-test",
   "version": "0.1.0",
   "private": true,
-"scripts": {
-        "dev": "next dev",
-        "build": "next build",
-        "start": "next start"
-    },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
   "dependencies": {
+    "@aws-amplify/core": "^6.13.2",
     "box-node-sdk": "^10.0.0",
     "box-typescript-sdk-gen": "^1.19.1",
     "next": "15.5.3",

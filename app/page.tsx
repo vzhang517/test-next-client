@@ -3,7 +3,8 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import { setCookie } from '@/lib/cookies';
-
+import {ConsoleLogger} from '@aws-amplify/core';
+const logger = new ConsoleLogger('test');
 function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -19,27 +20,28 @@ function HomeContent() {
           
           // Try to get from properly formatted params first
           let authCode = urlParams.get('auth_code');
+          logger.info('authCode:', authCode);
           let logoutURL = urlParams.get('redirect_to_box_url');
-          
+          logger.info('logoutURL:', logoutURL);
           // If still not found, try manual parsing for escaped backslashes
           if (!authCode || !logoutURL) {
             const urlString = currentUrl.split('?')[1] || '';
-            console.log('Manual parsing URL string:', urlString);
+            logger.info('Manual parsing URL string:', urlString);
             const paramPairs = urlString.split('&');
-            console.log('Parameter pairs:', paramPairs);
+            logger.info('Parameter pairs:', paramPairs);
             
             for (const pair of paramPairs) {
               // Handle both = and \= separators
               const separator = pair.includes('\\=') ? '\\=' : '=';
               const [key, value] = pair.split(separator);
-              console.log(`Processing pair: ${pair}, key: ${key}, value: ${value}`);
+              logger.info(`Processing pair: ${pair}, key: ${key}, value: ${value}`);
               
               if (key === 'auth_code' && !authCode) {
                 authCode = decodeURIComponent(value);
-                console.log('Found authCode:', authCode);
+                logger.info('Found authCode:', authCode);
               } else if (key === 'redirect_to_box_url' && !logoutURL) {
                 logoutURL = decodeURIComponent(value);
-                console.log('Found logoutURL:', logoutURL);
+                logger.info('Found logoutURL:', logoutURL);
               }
             }
           
