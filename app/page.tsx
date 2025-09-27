@@ -13,11 +13,37 @@ function HomeContent() {
   useEffect(() => {
     const handleBoxAuthentication = async () => {
       try {
-        // Get the authorization code from the URL parameters
-        const authCode = searchParams.get('auth_code');
 
-        // This URL closes the integration and refreshes the Box page
-        const logoutURL = searchParams.get('redirect_to_box_url');
+          const currentUrl = window.location.href;
+          const urlParams = new URLSearchParams(currentUrl.split('?')[1] || '');
+          
+          // Try to get from properly formatted params first
+          let authCode = urlParams.get('auth_code');
+          let logoutURL = urlParams.get('redirect_to_box_url');
+          
+          // If still not found, try manual parsing for escaped backslashes
+          if (!authCode || !logoutURL) {
+            const urlString = currentUrl.split('?')[1] || '';
+            console.log('Manual parsing URL string:', urlString);
+            const paramPairs = urlString.split('&');
+            console.log('Parameter pairs:', paramPairs);
+            
+            for (const pair of paramPairs) {
+              // Handle both = and \= separators
+              const separator = pair.includes('\\=') ? '\\=' : '=';
+              const [key, value] = pair.split(separator);
+              console.log(`Processing pair: ${pair}, key: ${key}, value: ${value}`);
+              
+              if (key === 'auth_code' && !authCode) {
+                authCode = decodeURIComponent(value);
+                console.log('Found authCode:', authCode);
+              } else if (key === 'redirect_to_box_url' && !logoutURL) {
+                logoutURL = decodeURIComponent(value);
+                console.log('Found logoutURL:', logoutURL);
+              }
+            }
+          
+        }
         
         if (!authCode || !logoutURL) {
           setError('No authorization code or logout URL received from Box');
