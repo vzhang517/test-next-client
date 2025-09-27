@@ -62,7 +62,7 @@ function HomeContent() {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ authCode }),
+          body: JSON.stringify({ auth_code: authCode }),
         });
 
         const userData = await response.json();

@@ -4,7 +4,7 @@ import { BoxClient, BoxOAuth, OAuthConfig} from 'box-typescript-sdk-gen';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const authCode = body.authCode;
+    const authCode = body.auth_code;
 
     if (!authCode) {
       return NextResponse.json(
