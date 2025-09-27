@@ -3,10 +3,10 @@ import { BoxClient, BoxOAuth, OAuthConfig} from 'box-typescript-sdk-gen';
 
 export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const code = searchParams.get('code');
+    const body = await request.json();
+    const authCode = body.authCode;
 
-    if (!code) {
+    if (!authCode) {
       return NextResponse.json(
         { error: 'Authorization code is required' },
         { status: 400 }
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const oauth = new BoxOAuth({ config: config });
 
     // Exchange authorization code for access token
-    const tokenResponse = await oauth.getTokensAuthorizationCodeGrant(code);
+    const tokenResponse = await oauth.getTokensAuthorizationCodeGrant(authCode);
 
     const client = new BoxClient({ auth: oauth });
 

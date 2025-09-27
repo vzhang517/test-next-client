@@ -115,10 +115,10 @@ function HomeContent() {
               </svg>
             </div>
             <div className="mt-4 text-center">
-              <h3 className="text-lg font-medium text-gray-900">Authentication Required</h3>
+              <h3 className="text-lg font-medium text-gray-900">Authentication Failed</h3>
               <p className="text-sm">{error}</p>
               <p className="mt-2 text-sm text-gray-500">
-                Please add a userID parameter to the URL to access the application.
+                auth_code not detected
               </p>
               <p className="mt-2 text-xs text-gray-400">
                 Please close the integration and restart in Box to try again.
