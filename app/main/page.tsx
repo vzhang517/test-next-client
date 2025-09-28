@@ -11,7 +11,7 @@ import Recertification from '@/components/Recertification';
 import ContainerRecertificationDetails from '@/components/ContainerRecertificationDetails';
 import ContainerOwnerDashboard from '@/components/ContainerOwnerDashboard';
 import SessionTimeoutPopup from '@/components/SessionTimeoutPopup';
-import { getCookie } from '@/lib/cookies';
+import { cookies } from 'next/headers'
 
 function MainPageContent() {
   const [user, setUser] = useState<User | null>(null);
@@ -23,24 +23,29 @@ function MainPageContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const userId =  getCookie('user_id');
-    const userName =  getCookie('user_name');
-    
-    if (!userId) {
-      setError('User ID is required in the URL');
-      setIsLoading(false);
-      return;
-    }
 
     try {
-      const authenticatedUser = checkAdmin(userId);
-      setUser(authenticatedUser);
-      setError(null);
-      
-      // Set default section based on user role
-      if (authenticatedUser.isAdmin) {
-        setCurrentSection('admin');
+      async function handleUserCheck() {
+        const cookieStore = await cookies()
+        const userId = cookieStore.get('user_id')?.value;
+        const userName = cookieStore.get('user_name')?.value;
+  
+          if (!userId || !userName) {
+            setError('User ID and User Name is required');
+            setIsLoading(false);
+            return;
+          }
+
+          const authenticatedUser = checkAdmin(userId, userName);
+          setUser(authenticatedUser);
+          setError(null);
+          
+          // Set default section based on user role
+          if (authenticatedUser.isAdmin) {
+            setCurrentSection('admin');
+          }
       }
+      handleUserCheck();
 
       // Start session timeout service
       startSessionTimeout({

@@ -23,13 +23,14 @@ function generateUserName(userId: string): string {
 /**
  * Authenticate user with Box.com userID from URL
  */
-export function checkAdmin(userId: string): User {
+export function checkAdmin(userId: string, userName: string): User {
   if (!userId) {
     throw new Error('User ID is required');
   }
 
   return {
     id: userId,
+    name: userName,
     isAdmin: isAdminUser(userId),
   };
 }
