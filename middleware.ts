@@ -48,11 +48,32 @@ export async function middleware(request: NextRequest) {
 
     // }
     if (pathname.startsWith('/main')) {
-      const authCodeCookie = await getAuthCookie('auth_code', request)
+      const authCodeReponse = await fetch('/api/auth/get-cookie', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          cookie_name: 'auth_code',
+         }),
+      });
+      const authCodeJson = await authCodeReponse.json();
+      const authCodeCookie = authCodeJson.cookie_value;
       console.log('authCodeCookie:', authCodeCookie);
-      const logoutURLCookie = await getAuthCookie('redirect_to_box_url', request)
+
+      const logoutURLReponse = await fetch('/api/auth/get-cookie', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          cookie_name: 'redirect_to_box_url',
+         }),
+      });
+      const logoutURLJson = await logoutURLReponse.json();
+      const logoutURLCookie = logoutURLJson.cookie_value;
       console.log('logoutURLCookie:', logoutURLCookie);
-      
+
       if (!authCodeCookie || !logoutURLCookie) {
         const url = new URL('/', request.url);
         url.searchParams.set('status', 'failed');
