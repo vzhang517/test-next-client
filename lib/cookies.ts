@@ -83,8 +83,15 @@ export async function setAuthCookie(res: NextResponse, authCode: string, logoutU
     }
 }
 
-export async function getAuthCookie(COOKIE_NAME: string) {
-    const cookieStore = await cookies()
-    const cookie = cookieStore.get(COOKIE_NAME)
-    return cookie?.value
+export async function getAuthCookie(COOKIE_NAME: string, request?: NextRequest) {
+    if (request) {
+        // Use request.cookies in middleware context
+        const cookie = request.cookies.get(COOKIE_NAME);
+        return cookie?.value;
+    } else {
+        // Use cookies() in server component context
+        const cookieStore = await cookies();
+        const cookie = cookieStore.get(COOKIE_NAME);
+        return cookie?.value;
+    }
 }

@@ -22,8 +22,8 @@ export async function middleware(request: NextRequest) {
   try {
 
     const res = NextResponse.next()
-    const authCodeCookie = await getAuthCookie('auth_code')
-    const logoutURLCookie = await getAuthCookie('redirect_to_box_url')
+    const authCodeCookie = await getAuthCookie('auth_code', request)
+    const logoutURLCookie = await getAuthCookie('redirect_to_box_url', request)
 
     if (!authCodeCookie || !logoutURLCookie) {
       setAuthCookie(res, authCode, logoutURL)
