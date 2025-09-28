@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthCookie, setAuthCookie } from '@/lib/cookies';
+import { getAuthCookie } from '@/lib/cookies';
 export async function middleware(request: NextRequest) {
   // Skip authentication in development mode
   if (process.env.NODE_ENV === 'development' && process.env.SKIP_AUTH === 'true') {
