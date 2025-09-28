@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
     const cookieStore = await cookies()
     const body = await request.json();
     const COOKIE_NAME = body.cookie_name;
+    console.log('COOKIE_NAME:', COOKIE_NAME);
     const cookie = cookieStore.get(COOKIE_NAME);
     if (!cookie) {
       throw new Error('Cookie not found');

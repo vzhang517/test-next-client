@@ -57,7 +57,11 @@ export async function POST(request: NextRequest) {
     console.log('accessCookie page:', accessCookie);
     await cookieStore.set('redirect_to_box_url', logoutURL, { path: '/', expires: 7 }); // 7 days
     await cookieStore.set('user_id', userResponse.id, { path: '/', expires: 1 });
+    const userIDCookie = cookieStore.get('user_id');
+    console.log('userIDCookie page:', userIDCookie);
     await cookieStore.set('user_name', userResponse.name || '', { path: '/', expires: 1 });  // 1 day
+    const userNameCookie = cookieStore.get('user_name');
+    console.log('userNameCookie page:', userNameCookie);
 
     // Create response with user data
     const response = NextResponse.json({

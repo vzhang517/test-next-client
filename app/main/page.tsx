@@ -45,7 +45,7 @@ function MainPageContent() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ 
-            cookie_name: 'user_id',
+            cookie_name: 'user_name',
            }),
         });
         const userNameJson = await userNameReponse.json();
