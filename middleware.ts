@@ -1,21 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-export function middleware(request: NextRequest) {
+import { getAuthCookie, setAuthCookie } from './lib/cookies';
+import { useSearchParams, useRouter } from 'next/navigation';
+export async function middleware(request: NextRequest) {
   // Skip authentication in development mode
   if (process.env.NODE_ENV === 'development' && process.env.SKIP_AUTH === 'true') {
     return NextResponse.next();
   }
 
-  // For all other paths other than /, check for authentication
-  console.log('Checking for auth cookie...');
-  const accessCookie = request.cookies.get('auth_code');
-  console.log('accessCookie:', accessCookie);
-  if (!accessCookie) {
-    // If no auth cookie, redirect to the root
-    return NextResponse.redirect(new URL('/', request.url));
+  const searchParams = useSearchParams();
+  const authCode = searchParams.get('auth_code');
+  console.log('authCode:', authCode);
+  const logoutURL = searchParams.get('redirect_to_box_url');
+  console.log('logoutURL:', logoutURL);
+
+  if (!authCode || !logoutURL) {
+    const url = new URL('/', request.url);
+    url.searchParams.set('status', 'failed');
+    return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  try {
+
+    const res = NextResponse.next()
+    const authCodeCookie = await getAuthCookie('auth_code')
+    const logoutURLCookie = await getAuthCookie('redirect_to_box_url')
+
+    if (!authCodeCookie || !logoutURLCookie) {
+      setAuthCookie(res, authCode, logoutURL)
+    }
+
+    return res
+
+  } catch (error) {
+    console.error('Box authentication error:', error);
+    const url = new URL('/', request.url);
+    url.searchParams.set('status', 'failed');
+    return NextResponse.redirect(url);
+  }
 }
 
 export const config = {

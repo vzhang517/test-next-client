@@ -13,32 +13,37 @@ function HomeContent() {
     const handleBoxAuthentication = async () => {
       try {
 
-        const authCode = searchParams.get('auth_code');
-        const logoutURL = searchParams.get('redirect_to_box_url');
-        
-        if (!authCode || !logoutURL) {
-          setError('No authorization code or logout URL received from Box');
+        // const authCode = searchParams.get('auth_code');
+        // const logoutURL = searchParams.get('redirect_to_box_url');
+        const status = searchParams.get('status');
+        if (status === 'failed') {
+          setError('Authentication failed');
           setIsLoading(false);
           return;
         }
+        // if (!authCode || !logoutURL) {
+        //   setError('No authorization code or logout URL received from Box');
+        //   setIsLoading(false);
+        //   return;
+        // }
 
         // Do a box api call with auth code to check that it is valid
-        const response = await fetch('/api/auth/box-auth', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ 
-            auth_code: authCode,
-            redirect_to_box_url: logoutURL
-           }),
-        });
+        // const response = await fetch('/api/auth/box-auth', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify({ 
+        //     auth_code: authCode,
+        //     redirect_to_box_url: logoutURL
+        //    }),
+        // });
 
 
         // if code is not valid, throw an error
-        if (!response.ok) {
-          throw new Error(`Failed to authenticate with Box. Error: ${response.status} ${response.statusText}`);
-        }
+        // if (!response.ok) {
+        //   throw new Error(`Failed to authenticate with Box. Error: ${response.status} ${response.statusText}`);
+        // }
 
         // Redirect to main page
         router.push(`/main`)
