@@ -2,8 +2,6 @@
  * Session timeout service for Box token management
  */
 
-import { clearAuthCookies, getCookie } from './cookies';
-
 interface SessionTimeoutOptions {
   onShowPopup?: () => void;
   onHidePopup?: () => void;
@@ -133,14 +131,26 @@ class SessionTimeoutService {
   /**
    * Handle logout when token refresh fails
    */
-  private handleLogout() {
+  private async handleLogout() {
     console.log('Timeout, logging out user...');
     
     // Clear all authentication cookies
-    clearAuthCookies();
+    fetch('/api/clear-cookies', {
+      method: 'POST',
+    });
 
     // Get logout URL from cookies
-    const logoutURL = getCookie('redirect_to_box_url');
+    const logoutURLResponse = await fetch('/api/auth/get-cookie', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        cookie_name: 'logout_url',
+       }),
+    });
+    const logoutURLJson = await logoutURLResponse.json();
+    const logoutURL = logoutURLJson.cookie_value;
     
     if (logoutURL) {
       // Call logout callback if provided
