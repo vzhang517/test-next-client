@@ -11,7 +11,7 @@ import Recertification from '@/components/Recertification';
 import ContainerRecertificationDetails from '@/components/ContainerRecertificationDetails';
 import ContainerOwnerDashboard from '@/components/ContainerOwnerDashboard';
 import SessionTimeoutPopup from '@/components/SessionTimeoutPopup';
-import { cookies } from 'next/headers'
+import { getAuthCookie } from '@/lib/cookies';
 
 function MainPageContent() {
   const [user, setUser] = useState<User | null>(null);
@@ -26,9 +26,8 @@ function MainPageContent() {
 
     try {
       async function handleUserCheck() {
-        const cookieStore = await cookies()
-        const userId = cookieStore.get('user_id')?.value;
-        const userName = cookieStore.get('user_name')?.value;
+        const userId = await getAuthCookie('user_id')
+        const userName = await getAuthCookie('user_name')
   
           if (!userId || !userName) {
             setError('User ID and User Name is required');
