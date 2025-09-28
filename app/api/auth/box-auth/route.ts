@@ -22,6 +22,14 @@ export async function POST(request: NextRequest) {
       clientId: process.env.BOX_CLIENT_ID!,
       clientSecret: process.env.BOX_CLIENT_SECRET!,
     });
+
+    if (!config.clientId || !config.clientSecret) {
+      return NextResponse.json(
+        { error: 'Client ID and client secret are required' },
+        { status: 400 }
+      );
+    }
+
     console.log('OAuth config created', config);
     
     console.log('Creating BoxOAuth...');

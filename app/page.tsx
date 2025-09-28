@@ -43,15 +43,16 @@ function HomeContent() {
           body: JSON.stringify({ auth_code: authCode }),
         });
 
+
+        // if code is not valid, throw an error
+        if (!response.ok) {
+          throw new Error(`Failed to authenticate with Box. Error: ${response.status} ${response.statusText}`);
+        }
+
         const userData = await response.json();
 
         setCookie('user_id', userData.id, { expires: 1 });
         setCookie('user_name', userData.name, { expires: 1 });  // 1 day
-
-        // if code is not valid, throw an error
-        if (!userData.ok) {
-          throw new Error(userData.error || 'Failed to authenticate with Box');
-        }
         
         // Redirect to main page
         router.push(`/main`)
