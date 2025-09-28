@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
-import { setCookie } from '@/lib/cookies';
+import { setCookie, getCookie } from '@/lib/cookies';
 import {ConsoleLogger} from '@aws-amplify/core';
 const logger = new ConsoleLogger('test');
 function HomeContent() {
@@ -32,6 +32,8 @@ function HomeContent() {
         }
 
         setCookie('auth_code', authCode, { expires: 1 }); // 1 day
+        const accessCookie = getCookie('auth_code');
+        console.log('accessCookie page:', accessCookie);
         setCookie('redirect_to_box_url', logoutURL, { expires: 7 }); // 7 days
 
         // Do a box api call with auth code to check that it is valid

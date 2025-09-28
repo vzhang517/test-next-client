@@ -7,11 +7,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const { pathname } = request.nextUrl;
-
-  // For all other paths, check for authentication
+  // For all other paths other than /, check for authentication
   console.log('Checking for auth cookie...');
-  const accessCookie = getCookie('auth_code');
+  const accessCookie = request.cookies.get('auth_code');
   console.log('accessCookie:', accessCookie);
   if (!accessCookie) {
     // If no auth cookie, redirect to the root
