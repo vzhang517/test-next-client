@@ -26,30 +26,33 @@ function MainPageContent() {
     try {
       async function handleUserCheck() {
 
-        const userIDReponse = await fetch('/api/get-cookie', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ 
-            cookie_name: 'user_id',
-           }),
-        });
+        // const userIDReponse = await fetch('/api/get-cookie', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify({ 
+        //     cookie_name: 'user_id',
+        //    }),
+        // });
 
-        const userIDJson = await userIDReponse.json();
-        const userId = userIDJson.cookie_value;
+        // const userIDJson = await userIDReponse.json();
+        // const userId = userIDJson.cookie_value;
 
-        const userNameReponse = await fetch('/api/get-cookie', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ 
-            cookie_name: 'user_name',
-           }),
-        });
-        const userNameJson = await userNameReponse.json();
-        const userName = userNameJson.user_name;
+        // const userNameReponse = await fetch('/api/get-cookie', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   body: JSON.stringify({ 
+        //     cookie_name: 'user_name',
+        //    }),
+        // });
+        // const userNameJson = await userNameReponse.json();
+        // const userName = userNameJson.user_name;
+
+        const userId = await document.cookie.split('; ').find(row => row.startsWith('user_id='))?.split('=')[1];
+        const userName = await document.cookie.split('; ').find(row => row.startsWith('user_name='))?.split('=')[1];
 
         if (!userId || !userName) {
           setError('User ID and User Name is required');
