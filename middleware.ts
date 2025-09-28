@@ -11,6 +11,7 @@ export function middleware(request: NextRequest) {
   // For all other paths, check for authentication
   console.log('Checking for auth cookie...');
   const accessCookie = request.cookies.get('auth_code');
+  console.log('accessCookie:', accessCookie);
   if (!accessCookie) {
     // If no auth cookie, redirect to the root
     return NextResponse.redirect(new URL('/', request.url));
