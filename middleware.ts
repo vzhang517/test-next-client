@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
 
     // }
     if (pathname.startsWith('/main')) {
-      const authCodeReponse = await fetch('/api/auth/get-cookie', {
+      const authCodeReponse = await fetch('/api/get-cookie', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ export async function middleware(request: NextRequest) {
       const authCodeCookie = authCodeJson.cookie_value;
       console.log('authCodeCookie:', authCodeCookie);
 
-      const logoutURLReponse = await fetch('/api/auth/get-cookie', {
+      const logoutURLReponse = await fetch('/api/get-cookie', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

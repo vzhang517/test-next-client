@@ -26,7 +26,7 @@ function MainPageContent() {
     try {
       async function handleUserCheck() {
 
-        const userIDReponse = await fetch('/api/auth/get-cookie', {
+        const userIDReponse = await fetch('/api/get-cookie', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -39,7 +39,7 @@ function MainPageContent() {
         const userIDJson = await userIDReponse.json();
         const userId = userIDJson.cookie_value;
 
-        const userNameReponse = await fetch('/api/auth/get-cookie', {
+        const userNameReponse = await fetch('/api/get-cookie', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

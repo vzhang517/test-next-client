@@ -143,7 +143,7 @@ class SessionTimeoutService {
     });
 
     // Get logout URL from cookies
-    const logoutURLResponse = await fetch('/api/auth/get-cookie', {
+    const logoutURLResponse = await fetch('/api/get-cookie', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
