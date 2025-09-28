@@ -19,15 +19,28 @@ export async function middleware(request: NextRequest) {
 
   try {
 
-    const res = NextResponse.next()
     const authCodeCookie = await getAuthCookie('auth_code', request)
     const logoutURLCookie = await getAuthCookie('redirect_to_box_url', request)
 
     if (!authCodeCookie || !logoutURLCookie) {
-      setAuthCookie(res, authCode, logoutURL)
+      const response = await fetch('/api/auth/box-auth', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            auth_code: authCode,
+            redirect_to_box_url: logoutURL
+           }),
+        });
+
+      // if code is not valid, throw an error
+        if (!response.ok) {
+          throw new Error(`Failed to authenticate with Box. Error: ${response.status} ${response.statusText}`);
+        }
     }
 
-    return res
+    return NextResponse.next()
 
   } catch (error) {
     console.error('Box authentication error:', error);
