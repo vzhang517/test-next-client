@@ -49,8 +49,10 @@ export async function middleware(request: NextRequest) {
     // }
     if (pathname.startsWith('/main')) {
       const authCodeCookie = await getAuthCookie('auth_code', request)
+      console.log('authCodeCookie:', authCodeCookie);
       const logoutURLCookie = await getAuthCookie('redirect_to_box_url', request)
-
+      console.log('logoutURLCookie:', logoutURLCookie);
+      
       if (!authCodeCookie || !logoutURLCookie) {
         const url = new URL('/', request.url);
         url.searchParams.set('status', 'failed');
