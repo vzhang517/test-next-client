@@ -2,7 +2,6 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
-import { cookies } from 'next/headers'
 function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();

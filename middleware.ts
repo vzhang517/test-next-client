@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuthCookie, setAuthCookie } from './lib/cookies';
+import { getAuthCookie, setAuthCookie } from '@/lib/cookies';
 import { useSearchParams, useRouter } from 'next/navigation';
 export async function middleware(request: NextRequest) {
   // Skip authentication in development mode
