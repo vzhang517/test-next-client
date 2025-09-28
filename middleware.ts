@@ -9,14 +9,14 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // For all other paths, check for authentication
-  if (pathname !== '/' || !pathname.startsWith('/api/auth/box-auth')) {
     console.log('Checking for auth cookie...');
     const accessCookie = request.cookies.get('auth_code');
     if (!accessCookie) {
       // If no auth cookie, redirect to the root
       return NextResponse.redirect(new URL('/', request.url));
     }
-  }
+}
 
-  return NextResponse.next();
+  export const config = {
+    matcher: ["/main/:path*"],
 }
