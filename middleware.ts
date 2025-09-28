@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthCookie, setAuthCookie } from '@/lib/cookies';
-import { useSearchParams, useRouter } from 'next/navigation';
 export async function middleware(request: NextRequest) {
   // Skip authentication in development mode
   if (process.env.NODE_ENV === 'development' && process.env.SKIP_AUTH === 'true') {
     return NextResponse.next();
   }
 
-  const searchParams = useSearchParams();
-  const authCode = searchParams.get('auth_code');
+  const authCode = request.nextUrl.searchParams.get('auth_code');
   console.log('authCode:', authCode);
-  const logoutURL = searchParams.get('redirect_to_box_url');
+  const logoutURL = request.nextUrl.searchParams.get('redirect_to_box_url');
   console.log('logoutURL:', logoutURL);
 
   if (!authCode || !logoutURL) {
