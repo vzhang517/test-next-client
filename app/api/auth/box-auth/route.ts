@@ -22,15 +22,15 @@ export async function POST(request: NextRequest) {
       clientId: process.env.BOX_CLIENT_ID!,
       clientSecret: process.env.BOX_CLIENT_SECRET!,
     });
-    console.log('OAuth config created');
+    console.log('OAuth config created', config);
     
     console.log('Creating BoxOAuth...');
     const oauth = new BoxOAuth({ config: config });
-    console.log('BoxOAuth created');
+    console.log('BoxOAuth created', oauth);
 
     // Exchange authorization code for access token
     console.log('Exchanging auth code for token...');
-    const tokenResponse = await oauth.getTokensAuthorizationCodeGrant(authCode);
+    await oauth.getTokensAuthorizationCodeGrant(authCode);
     console.log('Token exchange successful');
 
     console.log('Creating BoxClient...');
