@@ -135,8 +135,11 @@ class SessionTimeoutService {
     console.log('Timeout, logging out user...');
     
     // Clear all authentication cookies
-    fetch('/api/clear-cookies', {
-      method: 'POST',
+    await fetch('/api/clear-cookies', {
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json',
+      }
     });
 
     // Get logout URL from cookies

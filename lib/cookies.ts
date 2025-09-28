@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BoxClient, BoxOAuth, OAuthConfig } from 'box-typescript-sdk-gen';
-import { cookies } from 'next/headers'
 
 export async function setAuthCookie(res: NextResponse, authCode: string, logoutURL: string) {
     try {
@@ -83,15 +82,9 @@ export async function setAuthCookie(res: NextResponse, authCode: string, logoutU
     }
 }
 
-export async function getAuthCookie(COOKIE_NAME: string, request?: NextRequest) {
-    if (request) {
-        // Use request.cookies in middleware context
+export async function getAuthCookie(COOKIE_NAME: string, request: NextRequest) {
+
         const cookie = request.cookies.get(COOKIE_NAME);
         return cookie?.value;
-    } else {
-        // Use cookies() in server component context
-        const cookieStore = await cookies();
-        const cookie = cookieStore.get(COOKIE_NAME);
-        return cookie?.value;
-    }
+
 }
