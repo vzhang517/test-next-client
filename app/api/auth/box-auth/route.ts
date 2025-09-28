@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BoxClient, BoxOAuth, OAuthConfig} from 'box-typescript-sdk-gen';
-import {ConsoleLogger} from '@aws-amplify/core';
-const logger = new ConsoleLogger('test');
+import { cookies } from 'next/headers'
 
 export async function POST(request: NextRequest) {
   try {
+    const cookieStore = await cookies()
     const body = await request.json();
-    logger.info('body:', body);
     console.log('body:', body);
     const authCode = body.auth_code;
     console.log('authCode:', authCode);
+    const logoutURL = body.redirect_to_box_url;
+    console.log('logoutURL:', logoutURL);
 
     if (!authCode) { 
       return NextResponse.json(
@@ -50,43 +51,20 @@ export async function POST(request: NextRequest) {
     const userResponse = await client.users.getUserMe();
     console.log('User info retrieved');
 
+
+    cookieStore.set('auth_code', authCode, { expires: 1 }); // 1 day
+    const accessCookie = cookieStore.get('auth_code');
+    console.log('accessCookie page:', accessCookie);
+    cookieStore.set('redirect_to_box_url', logoutURL, { expires: 7 }); // 7 days
+    cookieStore.set('user_id', userResponse.id, { expires: 1 });
+    cookieStore.set('user_name', userResponse.name || '', { expires: 1 });  // 1 day
+
     // Create response with user data
     const response = NextResponse.json({
-      user: {
-        id: userResponse.id,
-        name: userResponse.name,
-        login: userResponse.login,
-        email: userResponse.login, // Box uses login as email
-      }
+      200: 'success'
     });
 
-    // Set authentication cookies
-    // response.cookies.set('box_access_token', tokenResponse.accessToken!, {
-    //   httpOnly: true,
-    //   secure: true,
-    //   sameSite: 'strict',
-    //   maxAge: 3600 // 1 hour
-    // });
-    
-    // response.cookies.set('box_refresh_token', tokenResponse.refreshToken!, {
-    //   httpOnly: true,
-    //   secure: true,
-    //   sameSite: 'strict',
-    //   maxAge: 7 * 24 * 3600 // 7 days
-    // });
-    
-    // response.cookies.set('box_user', JSON.stringify({
-    //   id: userResponse.id,
-    //   name: userResponse.name,
-    //   login: userResponse.login,
-    //   email: userResponse.login,
-    // }), {
-    //   httpOnly: true,
-    //   secure: true,
-    //   sameSite: 'strict',
-    //   maxAge: 3600 // 1 hour
-    // });
-
+   
     return response;
 
   } catch (error) {

@@ -2,9 +2,7 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
-import { setCookie, getCookie } from '@/lib/cookies';
-import {ConsoleLogger} from '@aws-amplify/core';
-const logger = new ConsoleLogger('test');
+import { cookies } from 'next/headers'
 function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -17,13 +15,6 @@ function HomeContent() {
 
         const authCode = searchParams.get('auth_code');
         const logoutURL = searchParams.get('redirect_to_box_url');
-          
-          // Try to get from properly formatted params first
-          logger.info('authCode:', authCode);
-          console.log('authCode:', authCode);
-          logger.info('logoutURL:', logoutURL);
-          console.log('logoutURL:', logoutURL);
-
         
         if (!authCode || !logoutURL) {
           setError('No authorization code or logout URL received from Box');
@@ -31,18 +22,16 @@ function HomeContent() {
           return;
         }
 
-        setCookie('auth_code', authCode, { expires: 1 }); // 1 day
-        const accessCookie = getCookie('auth_code');
-        console.log('accessCookie page:', accessCookie);
-        setCookie('redirect_to_box_url', logoutURL, { expires: 7 }); // 7 days
-
         // Do a box api call with auth code to check that it is valid
         const response = await fetch('/api/auth/box-auth', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ auth_code: authCode }),
+          body: JSON.stringify({ 
+            auth_code: authCode,
+            redirect_to_box_url: logoutURL
+           }),
         });
 
 
@@ -51,11 +40,6 @@ function HomeContent() {
           throw new Error(`Failed to authenticate with Box. Error: ${response.status} ${response.statusText}`);
         }
 
-        const userData = await response.json();
-
-        setCookie('user_id', userData.id, { expires: 1 });
-        setCookie('user_name', userData.name, { expires: 1 });  // 1 day
-        
         // Redirect to main page
         router.push(`/main`)
 

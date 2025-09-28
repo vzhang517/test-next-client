@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCookie } from '@/lib/cookies';
 
 export function middleware(request: NextRequest) {
   // Skip authentication in development mode
