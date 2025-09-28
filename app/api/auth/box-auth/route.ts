@@ -52,12 +52,12 @@ export async function POST(request: NextRequest) {
     console.log('User info retrieved');
 
 
-    cookieStore.set('auth_code', authCode, { expires: 1 }); // 1 day
+    cookieStore.set('auth_code', authCode, { path: '/', expires: 1 }); // 1 day
     const accessCookie = cookieStore.get('auth_code');
     console.log('accessCookie page:', accessCookie);
-    cookieStore.set('redirect_to_box_url', logoutURL, { expires: 7 }); // 7 days
-    cookieStore.set('user_id', userResponse.id, { expires: 1 });
-    cookieStore.set('user_name', userResponse.name || '', { expires: 1 });  // 1 day
+    cookieStore.set('redirect_to_box_url', logoutURL, { path: '/', expires: 7 }); // 7 days
+    cookieStore.set('user_id', userResponse.id, { path: '/', expires: 1 });
+    cookieStore.set('user_name', userResponse.name || '', { path: '/', expires: 1 });  // 1 day
 
     // Create response with user data
     const response = NextResponse.json({
