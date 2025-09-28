@@ -164,8 +164,11 @@ function MainPageContent() {
             </svg>
           </div>
           <div className="mt-4 text-center">
-            <h3 className="text-lg font-medium text-gray-900">Authentication Error</h3>
+            <h3 className="text-lg font-medium text-gray-900">User Check Error</h3>
             <p className="mt-2 text-sm text-gray-500">{error}</p>
+            <p className="mt-2 text-xs text-gray-400">
+                Please close the integration and restart in Box to try again.
+            </p>
           </div>
         </div>
       </div>
