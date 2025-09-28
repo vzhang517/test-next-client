@@ -11,7 +11,6 @@ import Recertification from '@/components/Recertification';
 import ContainerRecertificationDetails from '@/components/ContainerRecertificationDetails';
 import ContainerOwnerDashboard from '@/components/ContainerOwnerDashboard';
 import SessionTimeoutPopup from '@/components/SessionTimeoutPopup';
-import { getAuthCookie } from '@/lib/cookies';
 
 function MainPageContent() {
   const [user, setUser] = useState<User | null>(null);
@@ -26,11 +25,34 @@ function MainPageContent() {
 
     try {
       async function handleUserCheck() {
-        const userId = await getAuthCookie('user_id')
-        const userName = await getAuthCookie('user_name')
-  
-          if (!userId || !userName) {
-            setError('User ID and User Name is required');
+
+        const userIDReponse = await fetch('/api/auth/get-cookie', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            cookie_name: 'user_id',
+           }),
+        });
+
+        const userIDJson = await userIDReponse.json();
+        const userId = userIDJson.cookie_value;
+
+        const userNameReponse = await fetch('/api/auth/get-cookie', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            cookie_name: 'user_id',
+           }),
+        });
+        const userNameJson = await userNameReponse.json();
+        const userName = userNameJson.user_name;
+
+        if (!userId || !userName) {
+          setError('User ID and User Name is required');
             setIsLoading(false);
             return;
           }
@@ -68,7 +90,7 @@ function MainPageContent() {
       });
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Authentication failed');
+      setError(err instanceof Error ? err.message : 'User Check failed');
     } finally {
       setIsLoading(false);
     }
