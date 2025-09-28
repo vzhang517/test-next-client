@@ -16,7 +16,7 @@ function HomeContent() {
         // const logoutURL = searchParams.get('redirect_to_box_url');
         const status = searchParams.get('status');
         if (status === 'failed') {
-          setError('Authentication failed');
+          setError('User could not be authenticated');
           setIsLoading(false);
           return;
         }
