@@ -15,39 +15,15 @@ function HomeContent() {
     const handleBoxAuthentication = async () => {
       try {
 
-          const currentUrl = window.location.href;
-          const urlParams = new URLSearchParams(currentUrl.split('?')[1] || '');
+        const authCode = searchParams.get('auth_code');
+        const logoutURL = searchParams.get('redirect_to_box_url');
           
           // Try to get from properly formatted params first
-          let authCode = await urlParams.get('auth_code');
           logger.info('authCode:', authCode);
           console.log('authCode:', authCode);
-          let logoutURL = await urlParams.get('redirect_to_box_url');
           logger.info('logoutURL:', logoutURL);
           console.log('logoutURL:', logoutURL);
-          // If still not found, try manual parsing for escaped backslashes
-          if (!authCode || !logoutURL) {
-            const urlString = await currentUrl.split('?')[1] || '';
-            logger.info('Manual parsing URL string:', urlString);
-            const paramPairs = await urlString.split('&');
-            logger.info('Parameter pairs:', paramPairs);
-            
-            for (const pair of paramPairs) {
-              // Handle both = and \= separators
-              const separator = await pair.includes('\\=') ? '\\=' : '=';
-              const [key, value] = await pair.split(separator);
-              logger.info(`Processing pair: ${pair}, key: ${key}, value: ${value}`);
-              
-              if (key === 'auth_code' && !authCode) {
-                authCode = await decodeURIComponent(value);
-                logger.info('Found authCode:', authCode);
-              } else if (key === 'redirect_to_box_url' && !logoutURL) {
-                logoutURL = await decodeURIComponent(value);
-                logger.info('Found logoutURL:', logoutURL);
-              }
-            }
-          
-        }
+
         
         if (!authCode || !logoutURL) {
           setError('No authorization code or logout URL received from Box');
