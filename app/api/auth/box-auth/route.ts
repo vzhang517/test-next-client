@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     
     console.log('Creating BoxOAuth...');
     const oauth = new BoxOAuth({ config: config });
-    console.log('BoxOAuth created', oauth);
+    console.log('BoxOAuth created');
 
     // Exchange authorization code for access token
     console.log('Exchanging auth code for token...');
