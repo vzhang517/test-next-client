@@ -51,15 +51,17 @@ export async function POST(request: NextRequest) {
     const userResponse = await client.users.getUserMe();
     console.log('User info retrieved');
 
+    const oneDayFromNow = new Date();
+    oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
 
-    await cookieStore.set('auth_code', authCode, { path: '/', expires: 1 }); // 1 day
+    await cookieStore.set('auth_code', authCode, { path: '/', expires: oneDayFromNow }); // 1 day
     const accessCookie = cookieStore.get('auth_code');
     console.log('accessCookie page:', accessCookie);
-    await cookieStore.set('redirect_to_box_url', logoutURL, { path: '/', expires: 7 }); // 7 days
-    await cookieStore.set('user_id', userResponse.id, { path: '/', expires: 1 });
+    await cookieStore.set('redirect_to_box_url', logoutURL, { path: '/', expires: oneDayFromNow });
+    await cookieStore.set('user_id', userResponse.id, { path: '/', expires: oneDayFromNow });
     const userIDCookie = cookieStore.get('user_id');
     console.log('userIDCookie page:', userIDCookie);
-    await cookieStore.set('user_name', userResponse.name || '', { path: '/', expires: 1 });  // 1 day
+    await cookieStore.set('user_name', userResponse.name || '', { path: '/', expires: oneDayFromNow });  // 1 day
     const userNameCookie = cookieStore.get('user_name');
     console.log('userNameCookie page:', userNameCookie);
 
