@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getCookie } from '@/lib/cookies';
 
 export function middleware(request: NextRequest) {
   // Skip authentication in development mode
@@ -10,7 +11,7 @@ export function middleware(request: NextRequest) {
 
   // For all other paths, check for authentication
   console.log('Checking for auth cookie...');
-  const accessCookie = request.cookies.get('auth_code');
+  const accessCookie = getCookie('auth_code');
   console.log('accessCookie:', accessCookie);
   if (!accessCookie) {
     // If no auth cookie, redirect to the root
