@@ -57,15 +57,15 @@ export default async function Home({
     const oneDayFromNow = new Date();
     oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
 
-    cookieStore.set('auth_code', auth_code, { path: '/', expires: oneDayFromNow }); // 1 day
-    const accessCookie = cookieStore.get('auth_code');
-    console.log('accessCookie page:', accessCookie);
-    cookieStore.set('redirect_to_box_url', redirect_to_box_url, { path: '/', expires: oneDayFromNow });
-    cookieStore.set('user_id', userResponse.id, { path: '/', expires: oneDayFromNow });
-    const userIDCookie = cookieStore.get('user_id');
+    await cookieStore.set('auth_code', auth_code, { path: '/', expires: oneDayFromNow }); // 1 day
+    const accessCookie = await cookieStore.get('auth_code');
+    await console.log('accessCookie page:', accessCookie);
+    await cookieStore.set('redirect_to_box_url', redirect_to_box_url, { path: '/', expires: oneDayFromNow });
+    await cookieStore.set('user_id', userResponse.id, { path: '/', expires: oneDayFromNow });
+    const userIDCookie = await cookieStore.get('user_id');
     console.log('userIDCookie page:', userIDCookie);
-    cookieStore.set('user_name', userResponse.name || '', { path: '/', expires: oneDayFromNow });  // 1 day
-    const userNameCookie = cookieStore.get('user_name');
+    await cookieStore.set('user_name', userResponse.name || '', { path: '/', expires: oneDayFromNow });  // 1 day
+    const userNameCookie = await cookieStore.get('user_name');
     console.log('userNameCookie page:', userNameCookie);
 
     if(accessCookie && userIDCookie && userNameCookie) {

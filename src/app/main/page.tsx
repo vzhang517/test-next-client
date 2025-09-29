@@ -11,8 +11,8 @@ export default async function MainPageContent() {
     const cookieStore = await cookies()
 
 
-    const userId = cookieStore.get('user_id');
-    const userName = cookieStore.get('user_name');
+    const userId = await cookieStore.get('user_id');
+    const userName = await cookieStore.get('user_name');
     if (!userId || !userName) {
       throw new Error('User ID or user name not found');
     }
