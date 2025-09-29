@@ -2,7 +2,7 @@ import Authenticated from '@/_components/Authenticated';
 import Loading from '@/src/app/main/loading';
 import AppError from '@/_components/Error';
 import { Suspense } from 'react';
-import { BoxClient, BoxOAuth, OAuthConfig} from 'box-typescript-sdk-gen';
+import { BoxClient, BoxOAuth, OAuthConfig } from 'box-typescript-sdk-gen';
 import { cookies } from 'next/headers'
 
 export default async function Home({
@@ -15,7 +15,7 @@ export default async function Home({
     const params = await searchParams;
     const auth_code = params.auth_code;
     const redirect_to_box_url = params.redirect_to_box_url;
-    
+
     console.log('auth_code:', auth_code);
     console.log('redirect_to_box_url:', redirect_to_box_url);
 
@@ -34,7 +34,7 @@ export default async function Home({
     }
 
     console.log('OAuth config created', config);
-    
+
     console.log('Creating BoxOAuth...');
     const oauth = new BoxOAuth({ config: config });
     console.log('BoxOAuth created');
@@ -55,7 +55,7 @@ export default async function Home({
 
     const cookieStore = await cookies()
     const oneDayFromNow = new Date();
-    oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
+    await oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
 
     await cookieStore.set('auth_code', auth_code, { path: '/', expires: oneDayFromNow }); // 1 day
     const accessCookie = await cookieStore.get('auth_code');
@@ -68,23 +68,30 @@ export default async function Home({
     const userNameCookie = await cookieStore.get('user_name');
     console.log('userNameCookie page:', userNameCookie);
 
-    if(accessCookie && userIDCookie && userNameCookie) {
+    if (accessCookie && userIDCookie && userNameCookie) {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
-        <Authenticated /> </div> </div> )
+          <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
+            <Suspense fallback={<Loading />}>
+              <Authenticated />
+            </Suspense>
+          </div> </div>
+      )
     }
     else {
       throw new Error('Error authenticating with Box')
     }
-    
+
   } catch (error: any) {
-    return(
+    console.error('Error in Home:', error);
+    return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
-      <AppError error={error} />
-      </div>
-      </div> )
+        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
+          <Suspense fallback={<Loading />}>
+            <AppError error={error} />
+          </Suspense>
+        </div>
+      </div>)
   }
-    
+
 }
