@@ -122,9 +122,43 @@ src/
 |----------|-------------|----------|
 | `BOX_CLIENT_ID` | Box.com API client ID | Yes |
 | `BOX_CLIENT_SECRET` | Box.com API client secret | Yes |
-| `BOX_ENTERPRISE_ID` | Box.com enterprise ID | Yes |
 | `ADMIN_USER_IDS` | Comma-separated list of admin user IDs | Yes |
 | `NEXTAUTH_URL` | Application URL | Yes |
+
+## Deployment Issues & Solutions
+
+### Common Deployment Failures
+
+If your app fails immediately on deployment, check these common issues:
+
+1. **Missing Environment Variables**: Ensure all required environment variables are set in your deployment platform
+2. **Hardcoded URLs**: The app now uses relative URLs instead of hardcoded external URLs
+3. **Missing URL Parameters**: The app expects `auth_code` and `redirect_to_box_url` parameters
+
+### Required Environment Variables for Deployment
+
+Create a `.env.local` file or set these in your deployment platform:
+
+```bash
+# Box.com API Configuration
+BOX_CLIENT_ID=your_box_client_id_here
+BOX_CLIENT_SECRET=your_box_client_secret_here
+
+# Admin User Configuration (comma-separated list)
+ADMIN_USER_IDS=user1,user2,user3
+
+# Next.js Configuration
+NEXTAUTH_URL=https://your-domain.com
+NEXTAUTH_SECRET=your_nextauth_secret_here
+```
+
+### URL Parameters
+
+The app expects these URL parameters:
+- `auth_code`: Box.com authorization code
+- `redirect_to_box_url`: Box.com redirect URL
+
+Example: `https://your-domain.com?auth_code=abc123&redirect_to_box_url=https://box.com/logout`
 
 ## Development
 

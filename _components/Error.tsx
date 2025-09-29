@@ -1,3 +1,4 @@
+'use client';
 export default function AppError(error: any) {
     return(
     // Error state
