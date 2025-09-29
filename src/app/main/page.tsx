@@ -4,7 +4,7 @@ import { User } from '@/types/auth';
 import { checkAdmin } from '@/lib/userCheck';
 import MainPageClient from '@/_components/MainPageClient';
 import AppError from '@/_components/Error';
-import Loading from './loading';
+import AuthenticatedLoading from '../../../_components/AuthenticatedLoading';
 import { getUserCookies } from '@/src/app/cookies'
 import { useState, useEffect, Suspense } from 'react';
 
@@ -16,6 +16,7 @@ function MainPageContent() {
   useEffect(() => {
     try {
       async function handleUserCheck() {
+        console.log('inside main page - handleUserCheck');
 
         const userId = await getUserCookies('user_id');
         const userName = await getUserCookies('user_name');
@@ -38,7 +39,7 @@ function MainPageContent() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  });
 
   if (isLoading) {
     return (
@@ -57,7 +58,7 @@ function MainPageContent() {
     );
   }
   return (
-    <Suspense fallback={<Loading />}>
+    <Suspense fallback={<AuthenticatedLoading />}>
       <MainPageClient user={user} initialSection={initialSection} />
     </Suspense>
   )

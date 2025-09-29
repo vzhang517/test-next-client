@@ -6,7 +6,7 @@ import { Suspense } from 'react';
 import { authenticateWithBox } from '@/src/app/cookies';
 import Authenticated from '@/_components/Authenticated';
 import AppError from '@/_components/Error';
-import Loading from '@/src/app/loading';
+import AuthenticatingLoading from '@/_components/AuthenticatingLoading';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -45,16 +45,12 @@ function HomeContent() {
     handleBoxAuthentication();
   }, [searchParams, router]);
 
-  const handleOkClick = () => {
-    router.push('/main');
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
         {isLoading ? (
           // Loading state
-          <Loading />
+          <AuthenticatingLoading />
         ) : error ? (
           // Error state
           <AppError error={error} />
@@ -71,7 +67,7 @@ export default function Home() {
   return (
     <Suspense 
       fallback={
-        <Loading />
+        <AuthenticatingLoading />
       }>
       <HomeContent />
     </Suspense>
