@@ -9,9 +9,10 @@ import Recertification from '@/_components/Recertification';
 import ContainerRecertificationDetails from '@/_components/ContainerRecertificationDetails';
 import ContainerOwnerDashboard from '@/_components/ContainerOwnerDashboard';
 import SessionTimeoutPopup from '@/_components/SessionTimeoutPopup';
+import AppError from './Error';
 
 interface MainPageClientProps {
-  user: User;
+  user: User | null;
   initialSection?: string;
 }
 
@@ -62,7 +63,7 @@ export default function MainPageClient({ user, initialSection = 'recertification
   };
 
   const renderContent = () => {
-    if (!user) return null;
+    if (!user) return (<AppError error="User not found" />);
 
     switch (currentSection) {
       case 'admin':

@@ -1,46 +1,79 @@
-import Authenticated from '@/_components/Authenticated';
-import Loading from '@/src/app/main/loading';
-import AppError from '@/_components/Error';
+'use client';
+
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { Suspense } from 'react';
-import { authenticateWithBox } from '@/lib/cookies';
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ auth_code?: string, redirect_to_box_url?: string }>;
-}) {
+import { authenticateWithBox } from '@/src/app/cookies';
+import Authenticated from '@/_components/Authenticated';
+import AppError from '@/_components/Error';
+import Loading from '@/src/app/loading';
 
-  try {
-    const params = await searchParams;
-    const auth_code = params.auth_code;
-    const redirect_to_box_url = params.redirect_to_box_url;
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    console.log('auth_code:', auth_code);
-    console.log('redirect_to_box_url:', redirect_to_box_url);
+  useEffect(() => {
+    const handleBoxAuthentication = async () => {
+      try {
 
-    if (!auth_code || !redirect_to_box_url) {
-      throw new Error(`No authorization code or logout URL received from Box`);
-    }
-    await authenticateWithBox(auth_code, redirect_to_box_url);
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
-          <Suspense fallback={<Loading />}>
-            <Authenticated />
-          </Suspense>
-        </div>
+        const authCode = searchParams.get('auth_code');
+        const logoutURL = searchParams.get('redirect_to_box_url');
+
+        if (!authCode || !logoutURL) {
+          setError('No authorization code or logout URL received from Box');
+          setIsLoading(false);
+          return;
+        }
+
+        await authenticateWithBox(authCode, logoutURL);
+
+        // Set authenticated state to show success message
+        setIsAuthenticated(true);
+        setIsLoading(false);
+
+        
+      } catch (error) {
+        console.error('Box authentication error:', error);
+        setError(error instanceof Error ? error.message : 'Authentication failed');
+        setIsLoading(false);
+      }
+    };
+
+    handleBoxAuthentication();
+  }, [searchParams, router]);
+
+  const handleOkClick = () => {
+    router.push('/main');
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
+        {isLoading ? (
+          // Loading state
+          <Loading />
+        ) : error ? (
+          // Error state
+          <AppError error={error} />
+        ) : isAuthenticated ? (
+          // Success state
+          <Authenticated />
+        ) : null}
       </div>
-    )
+    </div>
+  );
+}
 
-  } catch (error: any) {
-    console.error('Error in Home:', error);
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
-          <Suspense fallback={<Loading />}>
-            <AppError error={error} />
-          </Suspense>
-        </div>
-      </div>)
-  }
-
+export default function Home() {
+  return (
+    <Suspense 
+      fallback={
+        <Loading />
+      }>
+      <HomeContent />
+    </Suspense>
+  );
 }

@@ -1,11 +1,9 @@
+'use server'
+
 import { BoxClient, BoxOAuth, OAuthConfig } from 'box-typescript-sdk-gen';
 import { cookies } from 'next/headers';
-import { Suspense } from 'react';
-import Authenticated from '@/_components/Authenticated';
-import Loading from '@/src/app/main/loading';
 
 export async function authenticateWithBox(auth_code: string, redirect_to_box_url: string) {
-        'use server'
         try {
                 // Do a box api call with auth code to check that it is valid
                 const config = new OAuthConfig({
@@ -57,3 +55,20 @@ export async function authenticateWithBox(auth_code: string, redirect_to_box_url
                 throw new Error('Error authenticating with Box')
         }
 }
+
+export async function getUserCookies(cookieName: string) {
+        try {
+                const cookieStore = await cookies()
+
+                const cookie = cookieStore.get(cookieName);
+                if (!cookie) {
+                throw new Error('Cookie not found');
+                }
+                return cookie.value;
+        }
+        catch (error) {
+                console.error('Box Autheication Error:', error);
+                throw new Error('Error authenticating with Box')
+        }
+        
+      }
