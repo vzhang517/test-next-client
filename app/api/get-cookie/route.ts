@@ -2,17 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { BoxClient, BoxOAuth, OAuthConfig} from 'box-typescript-sdk-gen'
 import { cookies } from 'next/headers'
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies()
-    const body = await request.json();
-    const COOKIE_NAME = body.cookie_name;
+
+    const COOKIE_NAME = request.nextUrl.searchParams.get('cookie_name');
     console.log('COOKIE_NAME:', COOKIE_NAME);
-    const cookie = await cookieStore.get(COOKIE_NAME);
+    if (!COOKIE_NAME) {
+      throw new Error('Cookie name not provided');
+    }
+    const cookie = cookieStore.get(COOKIE_NAME);
     if (!cookie) {
       throw new Error('Cookie not found');
     }
-
 
     // Use request.cookies in middleware context
     // const cookie = request.cookies.get(COOKIE_NAME);
@@ -28,10 +30,10 @@ export async function POST(request: NextRequest) {
     },
     });
 
-  } catch (error) {
+  } catch (error:any) {
     console.error('Cookie error:', error);
     return NextResponse.json(
-      { error: 'Error grabbing user cookies' },
+      { error: error.message },
       { status: 500 }
     );
   }

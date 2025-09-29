@@ -1,5 +1,3 @@
-'use server';
-
 import { User } from '@/types/auth';
 import { checkAdmin } from '@/lib/userCheck';
 import MainPageClient from '@/_components/MainPageClient';
@@ -10,37 +8,28 @@ import { Suspense } from 'react';
 export default async function MainPageContent() {
   try {
 
-    const userIDReponse = await fetch('/api/get-cookie', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        cookie_name: 'user_id',
-      }),
-    });
+    const userIDParam = new URLSearchParams();
+    userIDParam.append('cookie_name', 'user_id');
+    const userIDFetchUrl = `https://main.d1bol0p5uacib.amplifyapp.com/api/get-cookie?${userIDParam.toString()}`;
+    const userIDReponse = await fetch(userIDFetchUrl);
 
-    const userIDJson = await userIDReponse.json();
-    const userId = userIDJson.cookie_value;
 
-    const userNameReponse = await fetch('/api/get-cookie', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        cookie_name: 'user_name',
-      }),
-    });
-    const userNameJson = await userNameReponse.json();
-    const userName = userNameJson.user_name;
+    const userNameParam = new URLSearchParams();
+    userNameParam.append('cookie_name', 'user_name');
+    const userNameFetchUrl = `https://main.d1bol0p5uacib.amplifyapp.com/api/get-cookie?${userNameParam.toString()}`;
+    const userNameReponse = await fetch(userNameFetchUrl);
 
     // const userId = await document.cookie.split('; ').find(row => row.startsWith('user_id='))?.split('=')[1];
     // const userName = await document.cookie.split('; ').find(row => row.startsWith('user_name='))?.split('=')[1];
 
-    if (!userId || !userName) {
+    if (!userIDReponse.ok || !userNameReponse.ok) {
       throw new Error('Error with User Check');
     }
+    
+    const userIDJson = await userIDReponse.json();
+    const userId = userIDJson.cookie_value;
+    const userNameJson = await userNameReponse.json();
+    const userName = userNameJson.user_name;
 
     // Authenticate user
     const authenticatedUser = await checkAdmin(userId, userName);

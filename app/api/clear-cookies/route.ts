@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { BoxClient, BoxOAuth, OAuthConfig} from 'box-typescript-sdk-gen'
 import { cookies } from 'next/headers'
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
 
     const cookieStore = await cookies()

@@ -136,24 +136,28 @@ class SessionTimeoutService {
     
     // Clear all authentication cookies
     await fetch('/api/clear-cookies', {
-      method: 'POST', 
-      headers: {
-        'Content-Type': 'application/json',
-      }
+      method: 'GET'
     });
 
+    const logoutURLParam = new URLSearchParams();
+    logoutURLParam.append('cookie_name', 'logout_url');
+    const logOutURLFetchUrl = `/api/get-cookie'${logoutURLParam.toString()}`;
+    const logOutURLReponse = await fetch(logOutURLFetchUrl);
+    const logoutURLJson = await logOutURLReponse.json();
+    const logoutURL = logoutURLJson.logout_url;
+
     // Get logout URL from cookies
-    const logoutURLResponse = await fetch('/api/get-cookie', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        cookie_name: 'logout_url',
-       }),
-    });
-    const logoutURLJson = await logoutURLResponse.json();
-    const logoutURL = logoutURLJson.cookie_value;
+    // const logoutURLResponse = await fetch('/api/get-cookie', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({ 
+    //     cookie_name: 'logout_url',
+    //    }),
+    // });
+    // const logoutURLJson = await logoutURLResponse.json();
+    // const logoutURL = logoutURLJson.cookie_value;
     
     if (logoutURL) {
       // Call logout callback if provided
