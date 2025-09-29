@@ -4,11 +4,12 @@ import MainPageClient from '@/_components/MainPageClient';
 import AppError from '@/_components/Error';
 import { Suspense } from 'react';
 import { cookies } from 'next/headers';
+import Loading from './loading';
 
 export default async function MainPageContent() {
   try {
 
-    async function getUserCookies(auth_code: string, redirect_to_box_url: string) {
+    async function getUserCookies() {
       "use server"
       const cookieStore = await cookies()
 
@@ -26,15 +27,22 @@ export default async function MainPageContent() {
       const initialSection = authenticatedUser.isAdmin ? 'admin' : 'recertification';
 
       return (
+        <Suspense fallback={<Loading />}>
         <MainPageClient user={authenticatedUser} initialSection={initialSection} />
+        </Suspense>
       )
-      await getUserCookies(auth_code, redirect_to_box_url);
     }
+      await getUserCookies();
 
   } catch (error: any) {
     console.error('Error in MainPageContent:', error);
     return (
-      <AppError error={error} />
-    );
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
+          <Suspense fallback={<Loading />}>
+            <AppError error={error} />
+          </Suspense>
+        </div>
+      </div>)
   }
 }
