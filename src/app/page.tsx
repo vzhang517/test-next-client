@@ -7,6 +7,7 @@ import { authenticateWithBox } from '@/src/app/cookies';
 import Authenticated from '@/_components/Authenticated';
 import AppError from '@/_components/Error';
 import AuthenticatingLoading from '@/_components/AuthenticatingLoading';
+import router from 'next/router';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -41,9 +42,10 @@ function HomeContent() {
         setIsLoading(false);
       }
     };
+    router.push('/main');
 
     handleBoxAuthentication();
-  }, [searchParams, router]);
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -54,9 +56,6 @@ function HomeContent() {
         ) : error ? (
           // Error state
           <AppError error={error} />
-        ) : isAuthenticated ? (
-          // Success state
-          <Authenticated />
         ) : null}
       </div>
     </div>
