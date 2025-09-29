@@ -56,7 +56,7 @@ export async function authenticateWithBox(auth_code: string, redirect_to_box_url
         }
 }
 
-export async function getUserCookies(cookieName: string) {
+export async function getCookie(cookieName: string) {
         try {
                 const cookieStore = await cookies()
 
