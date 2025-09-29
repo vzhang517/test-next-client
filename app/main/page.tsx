@@ -2,9 +2,9 @@
 
 import { User } from '@/types/auth';
 import { checkAdmin } from '@/lib/userCheck';
-import MainPageClient from '@/components/MainPageClient';
-import Loading from '@/components/Loading';
-import AppError from '@/components/Error';
+import MainPageClient from '@/_components/MainPageClient';
+import Loading from '@/_components/Loading';
+import AppError from '@/_components/Error';
 import { Suspense } from 'react';
 
 export default async function MainPageContent() {

@@ -1,25 +1,19 @@
-'use server';
-
-import Authenticated from '@/components/Authenticated';
-import Loading from '@/components/Loading';
-import AppError from '@/components/Error';
+import Authenticated from '@/_components/Authenticated';
+import Loading from '@/_components/Loading';
+import AppError from '@/_components/Error';
 import { Suspense } from 'react';
-
-type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
 export default async function Home({
-  searchParams,
+  params,
 }: {
-  searchParams: SearchParams}) {
+  params: Promise<{ auth_code: string, redirect_to_box_url: string }>}) {
 
   try {
 
-    const authInfo = await searchParams;
-    console.log('searchParams:', authInfo);
+    const { auth_code, redirect_to_box_url } = await params;
+    console.log('auth_code:', auth_code);
+    console.log('redirect_to_box_url:', redirect_to_box_url);
 
-    const authCode = (await searchParams).auth_code;
-    const logoutURL = (await searchParams).redirect_to_box_url;
-
-    if (!searchParams || !authCode || !logoutURL) {
+    if (!params || !auth_code || !redirect_to_box_url) {
       throw new Error(`No authorization code or logout URL received from Box`);
     }
 
@@ -30,8 +24,8 @@ export default async function Home({
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        auth_code: authCode,
-        redirect_to_box_url: logoutURL
+        auth_code: auth_code,
+        redirect_to_box_url: redirect_to_box_url
         }),
     });
 

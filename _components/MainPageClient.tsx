@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { User } from '@/types/auth';
 import { startSessionTimeout, stopSessionTimeout, handleSessionResponse } from '@/lib/refresh';
-import Layout from '@/components/Layout';
-import AdminView from '@/components/AdminView';
-import Recertification from '@/components/Recertification';
-import ContainerRecertificationDetails from '@/components/ContainerRecertificationDetails';
-import ContainerOwnerDashboard from '@/components/ContainerOwnerDashboard';
-import SessionTimeoutPopup from '@/components/SessionTimeoutPopup';
+import Layout from '@/_components/Layout';
+import AdminView from '@/_components/AdminView';
+import Recertification from '@/_components/Recertification';
+import ContainerRecertificationDetails from '@/_components/ContainerRecertificationDetails';
+import ContainerOwnerDashboard from '@/_components/ContainerOwnerDashboard';
+import SessionTimeoutPopup from '@/_components/SessionTimeoutPopup';
 
 interface MainPageClientProps {
   user: User;
