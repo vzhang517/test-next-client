@@ -10,7 +10,7 @@ export default async function MainPageContent() {
   try {
 
     async function getUserCookies() {
-      "use server"
+      'use server'
       const cookieStore = await cookies()
 
 
