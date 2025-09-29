@@ -53,6 +53,7 @@ export async function authenticateWithBox(auth_code: string, redirect_to_box_url
                 console.log('userNameCookie page:', userNameCookie);
         }
         catch (error) {
+                console.error('Box Autheication Error:', error);
                 throw new Error('Error authenticating with Box')
         }
 }
