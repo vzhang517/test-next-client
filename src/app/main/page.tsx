@@ -26,10 +26,8 @@ function MainPageContent() {
     const getUserInfo = async () => {
       try {
 
-          // const userId = await getCookie('user_id');
-          // const userName = await getCookie('user_name');
-          const userId = '45341523617';
-          const userName = 'John Doe';
+          const userId = await getCookie('user_id');
+          const userName = await getCookie('user_name');
 
           if (!userId || !userName) {
             setError('User ID or user name not found');
