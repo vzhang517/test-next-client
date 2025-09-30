@@ -7,7 +7,7 @@ import Authenticated from '@/_components/Authenticated';
 import AppError from '@/_components/Error';
 import AuthenticatingLoading from '@/_components/AuthenticatingLoading';
 import router from 'next/router';
-import { setCookie } from 'cookies-next/client'
+import { useSetCookie, useGetCookie } from 'cookies-next/client'
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -15,6 +15,8 @@ function HomeContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const setCookie = useSetCookie();
+  const getCookie = useGetCookie();
 
   useEffect(() => {
     const handleBoxAuthentication = async () => {
@@ -29,8 +31,27 @@ function HomeContent() {
           return;
         }
 
-        setCookie('auth_code',authCode);
-        setCookie('redirect_to_box_url',logoutURL);
+        const userResponse = await fetch('/api/auth/box-auth', {
+          method: 'POST',
+          body: JSON.stringify({auth_code: authCode}),
+        });
+
+        const userData = await userResponse.json();
+
+        const now = new Date();
+        const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour in milliseconds
+        const oneDayFromNow = new Date();
+        oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
+
+        setCookie('auth_code',authCode, { path: '/', expires: oneHourFromNow });
+        setCookie('redirect_to_box_url',logoutURL, { path: '/', expires: oneDayFromNow });
+
+        console.log('authCode cookie',getCookie('auth_code'));
+        console.log('logoutURL cookie', getCookie('redirect_to_box_url'));
+
+
+        setCookie('user_id',userData.id, { path: '/', expires: oneHourFromNow });
+        setCookie('user_name',userData.name || '', { path: '/', expires: oneHourFromNow });
 
         // Set authenticated state to show success message
         setIsAuthenticated(true);

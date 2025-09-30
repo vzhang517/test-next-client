@@ -34,7 +34,7 @@ class SessionTimeoutService {
     // Set up hourly popup (59 minutes = 3540000ms)
     this.intervalId = setInterval(() => {
       this.showTimeoutPopup();
-    }, 3540000); // 59 minutes = 3540000ms
+    }, 300000); // 59 minutes = 3540000ms
   }
 
   /**
