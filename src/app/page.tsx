@@ -68,10 +68,10 @@ function HomeContent() {
         setIsLoading(false);
       }
     };
-    router.push('/main');
+    //router.push('/main');
 
     handleBoxAuthentication();
-  }, [setCookie, getCookie]);
+  }, [setCookie, getCookie, searchParams]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -82,7 +82,11 @@ function HomeContent() {
         ) : error ? (
           // Error state
           <AppError error={error} />
-        ) : null}
+        ) : isAuthenticated ? (
+          // Authenticated state
+          <Authenticated />
+        )
+        : null}
       </div>
     </div>
   );
