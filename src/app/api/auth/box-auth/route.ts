@@ -48,6 +48,8 @@ export async function POST(request: NextRequest) {
     const userResponse = await client.users.getUserMe();
     console.log('User info retrieved');
 
+    console.log('userResponse in route', userResponse);
+
     // Create response with user data
     return new NextResponse(JSON.stringify(userResponse), {
       status: 200,

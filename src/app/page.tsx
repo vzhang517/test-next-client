@@ -36,6 +36,8 @@ function HomeContent() {
           body: JSON.stringify({auth_code: authCode}),
         });
 
+        console.log('userResponse', userResponse);
+
         const userData = await userResponse.json();
 
         console.log('userData', userData);
