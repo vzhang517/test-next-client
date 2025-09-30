@@ -81,7 +81,7 @@ function MainPageContent() {
     return () => {
       stopSessionTimeout();
     };
-  }, [searchParams]);
+  }, []);
 
   // Handle popup responses
   const handlePopupYes = () => {
