@@ -60,7 +60,7 @@ export async function getCookie(cookieName: string) {
         try {
                 const cookieStore = await cookies()
 
-                const cookie = cookieStore.get(cookieName);
+                const cookie = await cookieStore.get(cookieName);
                 if (!cookie) {
                 throw new Error('Cookie not found');
                 }
@@ -72,3 +72,18 @@ export async function getCookie(cookieName: string) {
         }
         
       }
+
+export async function clearCookie() {
+try {
+        const cookieStore = await cookies()
+
+        await cookieStore.delete('auth_code');
+        await cookieStore.delete('user_id');
+        await cookieStore.delete('user_name');
+}
+catch (error) {
+        console.error('Box authentication error::', error);
+        throw new Error('Error authenticating with Box')
+}
+
+}

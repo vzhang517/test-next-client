@@ -2,6 +2,8 @@
  * Session timeout service for Box token management
  */
 
+import { getCookie, clearCookie } from "@/src/app/cookies";
+
 interface SessionTimeoutOptions {
   onShowPopup?: () => void;
   onHidePopup?: () => void;
@@ -135,29 +137,9 @@ class SessionTimeoutService {
     console.log('Timeout, logging out user...');
     
     // Clear all authentication cookies
-    await fetch('/api/clear-cookies', {
-      method: 'GET'
-    });
+    await clearCookie();
 
-    const logoutURLParam = new URLSearchParams();
-    logoutURLParam.append('cookie_name', 'logout_url');
-    const logOutURLFetchUrl = `/api/get-cookie'${logoutURLParam.toString()}`;
-    const logOutURLReponse = await fetch(logOutURLFetchUrl);
-    const logoutURLJson = await logOutURLReponse.json();
-    const logoutURL = logoutURLJson.logout_url;
-
-    // Get logout URL from cookies
-    // const logoutURLResponse = await fetch('/api/get-cookie', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({ 
-    //     cookie_name: 'logout_url',
-    //    }),
-    // });
-    // const logoutURLJson = await logoutURLResponse.json();
-    // const logoutURL = logoutURLJson.cookie_value;
+    const logoutURL = await getCookie('logout_url');
     
     if (logoutURL) {
       // Call logout callback if provided
