@@ -38,6 +38,8 @@ function HomeContent() {
 
         const userData = await userResponse.json();
 
+        console.log('userData', userData);
+
         const now = new Date();
         const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour in milliseconds
         const oneDayFromNow = new Date();
