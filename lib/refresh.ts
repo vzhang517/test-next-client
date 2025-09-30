@@ -1,8 +1,7 @@
 /**
  * Session timeout service for Box token management
  */
-
-import { getCookie, clearCookie } from "@/src/app/cookies";
+import { getCookie, deleteCookie } from 'cookies-next/client'
 
 interface SessionTimeoutOptions {
   onShowPopup?: () => void;
@@ -137,9 +136,11 @@ class SessionTimeoutService {
     console.log('Timeout, logging out user...');
     
     // Clear all authentication cookies
-    await clearCookie();
+    deleteCookie('auth_code');
+    deleteCookie('user_id');
+    deleteCookie('user_name');
 
-    const logoutURL = await getCookie('logout_url');
+    const logoutURL = getCookie('logout_url');
     
     if (logoutURL) {
       // Call logout callback if provided

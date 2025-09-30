@@ -3,11 +3,11 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Suspense } from 'react';
-import { authenticateWithBox } from '@/src/app/cookies';
 import Authenticated from '@/_components/Authenticated';
 import AppError from '@/_components/Error';
 import AuthenticatingLoading from '@/_components/AuthenticatingLoading';
 import router from 'next/router';
+import { setCookie } from 'cookies-next/client'
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -29,7 +29,8 @@ function HomeContent() {
           return;
         }
 
-        await authenticateWithBox(authCode, logoutURL);
+        setCookie('auth_code',authCode);
+        setCookie('redirect_to_box_url',logoutURL);
 
         // Set authenticated state to show success message
         setIsAuthenticated(true);

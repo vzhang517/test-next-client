@@ -11,7 +11,7 @@ import Recertification from '@/_components/Recertification';
 import ContainerRecertificationDetails from '@/_components/ContainerRecertificationDetails';
 import ContainerOwnerDashboard from '@/_components/ContainerOwnerDashboard';
 import SessionTimeoutPopup from '@/_components/SessionTimeoutPopup';
-import { getCookie } from '@/src/app/cookies';
+import { getCookie } from 'cookies-next/client'
 
 function MainPageContent() {
   const [user, setUser] = useState<User | null>(null);
@@ -26,8 +26,8 @@ function MainPageContent() {
     const getUserInfo = async () => {
       try {
 
-          const userId = await getCookie('user_id');
-          const userName = await getCookie('user_name');
+          const userId = getCookie('user_id');
+          const userName = getCookie('user_name');
 
           if (!userId || !userName) {
             setError('User ID or user name not found');
