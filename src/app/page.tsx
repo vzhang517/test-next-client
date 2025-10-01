@@ -7,6 +7,7 @@ import Authenticated from '@/_components/Authenticated';
 import AppError from '@/_components/Error';
 import AuthenticatingLoading from '@/_components/AuthenticatingLoading';
 import { useSetCookie, useGetCookie } from 'cookies-next/client'
+import { useRouter } from 'next/router';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -15,6 +16,7 @@ function HomeContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const setCookie = useSetCookie();
   const getCookie = useGetCookie();
+  const router = useRouter();
 
   useEffect(() => {
     const handleBoxAuthentication = async () => {
@@ -40,31 +42,35 @@ function HomeContent() {
 
         console.log('userResponse', userResponse);
 
+        if (!userResponse.ok) {
+          setError('Failed to authenticate with Box');
+          setIsLoading(false);
+          return;
+        }
+
         const userData = await userResponse.json();
 
         console.log('userData', userData);
 
+        // const now = new Date();
+        // const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour in milliseconds
+        // const oneDayFromNow = new Date();
+        // oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
 
-
-        const now = new Date();
-        const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour in milliseconds
-        const oneDayFromNow = new Date();
-        oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
-
-        setCookie('auth_code',authCode, { path: '/', expires: oneHourFromNow });
-        setCookie('redirect_to_box_url',logoutURL, { path: '/', expires: oneDayFromNow });
+        // setCookie('auth_code',authCode, { path: '/', expires: oneHourFromNow });
+        // setCookie('redirect_to_box_url',logoutURL, { path: '/', expires: oneDayFromNow });
 
         console.log('authCode cookie',getCookie('auth_code'));
         console.log('logoutURL cookie', getCookie('redirect_to_box_url'));
 
 
-        setCookie('user_id',userData.id, { path: '/', expires: oneHourFromNow });
-        setCookie('user_name',userData.name || '', { path: '/', expires: oneHourFromNow });
+        // setCookie('user_id',userData.id, { path: '/', expires: oneHourFromNow });
+        // setCookie('user_name',userData.name || '', { path: '/', expires: oneHourFromNow });
 
         // Set authenticated state to show success message
-        setIsAuthenticated(true);
+        //setIsAuthenticated(true);
         setIsLoading(false);
-
+        router.push('/main');
         
       } catch (error) {
         console.error('Box authentication error:', error);
@@ -72,7 +78,7 @@ function HomeContent() {
         setIsLoading(false);
       }
     };
-    //router.push('/main');
+
 
     handleBoxAuthentication();
   }, []);
@@ -86,11 +92,7 @@ function HomeContent() {
         ) : error ? (
           // Error state
           <AppError error={error} />
-        ) : isAuthenticated ? (
-          // Authenticated state
-          <Authenticated />
-        )
-        : null}
+        ) : null}
       </div>
     </div>
   );

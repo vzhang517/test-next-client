@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BoxClient, BoxOAuth, OAuthConfig} from 'box-typescript-sdk-gen';
+import { cookies } from 'next/headers';
+import { getCookie, setCookie} from 'cookies-next/server';
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    console.log('testing api');
-    const body = await request.json();
+    const res = new NextResponse();
+    const body = await req.json();
     console.log('body:', body);
     const authCode = body.auth_code;
     console.log('authCode:', authCode);
+    const logoutURL = body.redirect_to_box_url;
+    console.log('logoutURL:', logoutURL);
 
     if (!authCode) { 
       return NextResponse.json(
@@ -48,15 +52,32 @@ export async function POST(request: NextRequest) {
     const userResponse = await client.users.getUserMe();
     console.log('User info retrieved');
 
-    console.log('userResponse in route', userResponse);
+    const oneDayFromNow = new Date();
+    oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
+
+    await setCookie('auth_code', authCode, { res, req });
+    await getCookie('auth_code', { res, req });
+
+    await setCookie('redirect_to_box_url', logoutURL, { res, req });
+    await getCookie('redirect_to_box_url', { res, req });
+
+    await setCookie('user_id', userResponse.id, { res, req });
+    await getCookie('user_id', { res, req });
+
+    await setCookie('user_name', userResponse.name || '', { res, req });
+    await getCookie('user_name', { res, req });
+
+    await setCookie('auth_code', authCode, { cookies });
+    await getCookie('auth_code', { cookies });
+    await setCookie('redirect_to_box_url', logoutURL, { cookies });
+    await getCookie('redirect_to_box_url', { cookies });
+    await setCookie('user_id', userResponse.id, { cookies });
+    await getCookie('user_id', { cookies });
+    await setCookie('user_name', userResponse.name || '', { cookies });
+    await getCookie('user_name', { cookies });
 
     // Create response with user data
-    return new NextResponse(JSON.stringify(userResponse), {
-      status: 200,
-      headers: {
-          'Content-Type': 'application/json',
-      },
-      });
+    return res;
 
   } catch (error) {
     console.error('Box authentication error:', error);
