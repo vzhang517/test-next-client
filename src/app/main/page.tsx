@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { User } from '@/types/auth';
 import { checkAdmin, extractUserIdFromUrl } from '@/lib/userCheck';
 import { startSessionTimeout, stopSessionTimeout, handleSessionResponse } from '@/lib/refresh';
@@ -11,7 +11,6 @@ import ContainerRecertificationDetails from '@/_components/ContainerRecertificat
 import ContainerOwnerDashboard from '@/_components/ContainerOwnerDashboard';
 import SessionTimeoutPopup from '@/_components/SessionTimeoutPopup';
 import { getCookie } from 'cookies-next/client'
-import AuthenticatedLoading from '@/_components/AuthenticatedLoading';
 
 export default function MainPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -27,8 +26,8 @@ export default function MainPage() {
     const getUserInfo = async () => {
       try {
 
-          console.log('userId cookie', userId);
-          console.log('userName cookie', userName);
+        console.log('userID stored in localStorage front page:', localStorage.getItem('userID'));
+
 
           if (!userId || !userName) {
             setError('User ID or user name not found');
@@ -104,46 +103,41 @@ export default function MainPage() {
       case 'admin':
         if (!user.isAdmin) {
           return (
-            <Suspense fallback={<AuthenticatedLoading />}> 
             <div className="bg-white shadow rounded-lg p-6 text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
               <p className="text-gray-600">Admin privileges required to access this section.</p>
             </div>
-            </Suspense>
           );
         }
-        return <Suspense fallback={<AuthenticatedLoading />}><AdminView userId={user.id} /></Suspense>;
+        return <AdminView userId={user.id} />;
       
       case 'recertification':
-        return <Suspense fallback={<AuthenticatedLoading />}><Recertification userId={user.id} isAdmin={user.isAdmin} /></Suspense>;
+        return <Recertification userId={user.id} isAdmin={user.isAdmin} />;
       
       case 'container-details':
-        return <Suspense fallback={<AuthenticatedLoading />}><ContainerRecertificationDetails userId={user.id} isAdmin={user.isAdmin} /></Suspense>;
+        return <ContainerRecertificationDetails userId={user.id} isAdmin={user.isAdmin} />;
       
       case 'container-owner-dashboard':
-        return <Suspense fallback={<AuthenticatedLoading />}><ContainerOwnerDashboard userId={user.id} isAdmin={user.isAdmin} /></Suspense>;
+        return <ContainerOwnerDashboard userId={user.id} isAdmin={user.isAdmin} />;
       
       default:
-        return <Suspense fallback={<AuthenticatedLoading />}><Recertification userId={user.id} isAdmin={user.isAdmin} /></Suspense>;
+        return <Recertification userId={user.id} isAdmin={user.isAdmin} />;
     }
   };
 
   if (isLoading) {
     return (
-      <Suspense fallback={<AuthenticatedLoading />}>
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-lg text-gray-600">Loading...</p>
         </div>
       </div>
-      </Suspense>
     );
   }
 
   if (error) {
     return (
-      <Suspense fallback={<AuthenticatedLoading />}>
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
           <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
@@ -157,13 +151,11 @@ export default function MainPage() {
           </div>
         </div>
       </div>
-      </Suspense>
     );
   }
 
   return (
     <>
-      <Suspense fallback={<AuthenticatedLoading />}>
       <Layout 
         currentSection={currentSection} 
         onSectionChange={setCurrentSection}
@@ -180,8 +172,6 @@ export default function MainPage() {
         onTimeout={handlePopupTimeout}
         timeRemaining={timeoutCountdown}
       />
-      </Suspense>
     </>
-
   );
 }
