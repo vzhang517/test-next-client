@@ -35,7 +35,7 @@ function HomeContent() {
 
         const userResponse = await fetch('/api/auth/box-auth', {
           method: 'POST',
-          body: JSON.stringify({auth_code: authCode}),
+          body: JSON.stringify({auth_code: authCode, redirect_to_box_url: logoutURL}),
         });
 
         console.log('userResponse', userResponse);
