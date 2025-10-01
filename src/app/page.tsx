@@ -6,13 +6,15 @@ import { Suspense } from 'react';
 import Authenticated from '@/_components/Authenticated';
 import AppError from '@/_components/Error';
 import AuthenticatingLoading from '@/_components/AuthenticatingLoading';
-import { setCookie, getCookie } from 'cookies-next/client'
+import { useSetCookie, useGetCookie } from 'cookies-next/client'
 
 function HomeContent() {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const setCookie = useSetCookie();
+  const getCookie = useGetCookie();
 
   useEffect(() => {
     const handleBoxAuthentication = async () => {
