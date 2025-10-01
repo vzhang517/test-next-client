@@ -23,11 +23,15 @@ function HomeContent() {
         const authCode = searchParams.get('auth_code');
         const logoutURL = searchParams.get('redirect_to_box_url');
 
+        console.log('authCode from URL',authCode);
+        
         if (!authCode || !logoutURL) {
           setError('No authorization code or logout URL received from Box');
           setIsLoading(false);
           return;
         }
+
+        console.log('fetching Box auth');
 
         const userResponse = await fetch('/api/auth/box-auth', {
           method: 'POST',
@@ -39,6 +43,8 @@ function HomeContent() {
         const userData = await userResponse.json();
 
         console.log('userData', userData);
+
+
 
         const now = new Date();
         const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour in milliseconds
@@ -69,7 +75,7 @@ function HomeContent() {
     //router.push('/main');
 
     handleBoxAuthentication();
-  }, [searchParams]);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
