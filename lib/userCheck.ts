@@ -5,7 +5,7 @@ import { User } from '@/types/auth';
 /**
  * Check if a user ID is in the admin list
  */
-export function isAdminUser(userId: string): boolean {
+export async function isAdminUser(userId: string): Promise<boolean> {
   const adminUserIds = process.env.ADMIN_USER_IDS?.split(',') || [];
   console.log('adminUserIds', adminUserIds);
   console.log('userId', userId);
@@ -13,19 +13,9 @@ export function isAdminUser(userId: string): boolean {
 }
 
 /**
- * Generate a display name from user ID
- */
-function generateUserName(userId: string): string {
-  // Convert user ID to a more readable format
-  // This could be enhanced to fetch from an API or use a mapping
-  const cleanId = userId.replace(/[^a-zA-Z0-9]/g, '');
-  return `User ${cleanId.substring(0, 8)}`;
-}
-
-/**
  * Authenticate user with Box.com userID from URL
  */
-export function checkAdmin(userId: string, userName: string): User {
+export async function checkAdmin(userId: string, userName: string): Promise<User> {
   if (!userId) {
     throw new Error('User ID is required');
   }
@@ -33,14 +23,6 @@ export function checkAdmin(userId: string, userName: string): User {
   return {
     id: userId,
     name: userName,
-    isAdmin: isAdminUser(userId),
-  };
-}
-
-/**
- * Extract user ID from URL parameters
- */
-export function extractUserIdFromUrl(searchParams: URLSearchParams): string | null {
-  return searchParams.get('userID') || searchParams.get('userId') || searchParams.get('user_id');
-}
-
+    isAdmin: await isAdminUser(userId),
+  }
+};

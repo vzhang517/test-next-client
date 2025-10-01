@@ -35,7 +35,7 @@ export default function MainPage() {
             return;
           }
 
-          const authenticatedUser = checkAdmin(userId, userName);
+          const authenticatedUser = await checkAdmin(userId, userName);
           setUser(authenticatedUser);
           setError(null);
           setCurrentSection('admin');
