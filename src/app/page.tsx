@@ -1,22 +1,18 @@
 'use client';
 
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Suspense } from 'react';
 import Authenticated from '@/_components/Authenticated';
 import AppError from '@/_components/Error';
 import AuthenticatingLoading from '@/_components/AuthenticatingLoading';
-import router from 'next/router';
-import { useSetCookie, useGetCookie } from 'cookies-next/client'
+import { setCookie, getCookie } from 'cookies-next/client'
 
 function HomeContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const setCookie = useSetCookie();
-  const getCookie = useGetCookie();
 
   useEffect(() => {
     const handleBoxAuthentication = async () => {
@@ -71,7 +67,7 @@ function HomeContent() {
     //router.push('/main');
 
     handleBoxAuthentication();
-  }, [setCookie, getCookie, searchParams]);
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
