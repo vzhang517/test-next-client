@@ -4,10 +4,11 @@ import { User } from '@/types/auth';
  * Check if a user ID is in the admin list
  */
 export function isAdminUser(userId: string): boolean {
-  const adminUserIds = process.env.ADMIN_USER_IDS?.split(',') || [];
+   //const adminUserIds = process.env.ADMIN_USER_IDS?.replace(/['"]/g, '').split(',').map(id => id.trim()) || [];
+  const adminUserIds = process.env.ADMIN_USER_IDS;
   console.log('adminUserIds', adminUserIds);
   console.log('userId', userId);
-  return adminUserIds.includes(userId.trim());
+  return false
 }
 
 /**
