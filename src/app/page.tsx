@@ -7,7 +7,6 @@ import Authenticated from '@/_components/Authenticated';
 import AppError from '@/_components/Error';
 import AuthenticatingLoading from '@/_components/AuthenticatingLoading';
 import { useSetCookie, useGetCookie } from 'cookies-next/client'
-import { useRouter } from 'next/router';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -16,7 +15,6 @@ function HomeContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const setCookie = useSetCookie();
   const getCookie = useGetCookie();
-  const router = useRouter();
 
   useEffect(() => {
     const handleBoxAuthentication = async () => {
@@ -68,7 +66,7 @@ function HomeContent() {
         // setCookie('user_name',userData.name || '', { path: '/', expires: oneHourFromNow });
 
         // Set authenticated state to show success message
-        //setIsAuthenticated(true);
+        setIsAuthenticated(true);
         setIsLoading(false);
         
       } catch (error) {
@@ -80,7 +78,6 @@ function HomeContent() {
 
 
     handleBoxAuthentication();
-    router.push('/main');
   }, []);
 
   return (
@@ -92,7 +89,12 @@ function HomeContent() {
         ) : error ? (
           // Error state
           <AppError error={error} />
-        ) : null}
+        ) 
+        : isAuthenticated ? (
+          // Authenticated state
+          <Authenticated />
+        )
+        : null}
       </div>
     </div>
   );
