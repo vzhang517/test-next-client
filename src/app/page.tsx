@@ -1,12 +1,12 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Authenticated from '@/_components/Authenticated';
 import AppError from '@/_components/Error';
 import AuthenticatingLoading from '@/_components/AuthenticatingLoading';
 import { getCookie, setCookie } from 'cookies-next/client';
-
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const searchParams = useSearchParams();
@@ -19,6 +19,7 @@ export default function Home() {
   const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour in milliseconds
   const oneDayFromNow = new Date();
   oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
+  const router = useRouter();
 
   try {
     setCookie('redirect_to_box_url', logoutURL, { path: '/', expires: oneDayFromNow });
@@ -64,6 +65,7 @@ export default function Home() {
         // Set authenticated state to show success message
         setIsAuthenticated(true);
         setIsLoading(false);
+        router.push('/main');
 
       } catch (error) {
         console.error('Box authentication error:', error);
@@ -76,8 +78,8 @@ export default function Home() {
   }, [searchParams]);
 
   return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
+      <>
+        <Suspense fallback={<AuthenticatingLoading />}>
           {isLoading ? (
             // Loading state
             <AuthenticatingLoading />
@@ -89,7 +91,7 @@ export default function Home() {
             <Authenticated />
           )
             : null}
-        </div>
-      </div>
+          </Suspense>
+        </>
   );
 }

@@ -1,6 +1,8 @@
 export default function AuthenticatedLoading() {
     return (
         <>
+              <div className="min-h-screen flex items-center justify-center bg-gray-50">
+              <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
         <div className="flex items-center justify-center w-12 h-12 mx-auto bg-blue-100 rounded-full">
           <svg className="w-6 h-6 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -9,6 +11,8 @@ export default function AuthenticatedLoading() {
         </div>
         <div className="mt-4 text-center">
           <h3 className="text-lg font-medium text-gray-900">Loading...</h3>
+        </div>
+        </div>
         </div>
       </>
     );
