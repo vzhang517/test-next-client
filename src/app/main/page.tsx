@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { User } from '@/types/auth';
-import { checkAdmin, extractUserIdFromUrl } from '@/lib/userCheck';
+import { checkAdmin } from '@/lib/userCheck';
 import { startSessionTimeout, stopSessionTimeout, handleSessionResponse } from '@/lib/refresh';
 import Layout from '@/_components/MainLayout';
 import AdminView from '@/_components/AdminView';
