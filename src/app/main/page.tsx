@@ -11,7 +11,7 @@ import Recertification from '@/_components/Recertification';
 import ContainerRecertificationDetails from '@/_components/ContainerRecertificationDetails';
 import ContainerOwnerDashboard from '@/_components/ContainerOwnerDashboard';
 import SessionTimeoutPopup from '@/_components/SessionTimeoutPopup';
-import { useGetCookie } from 'cookies-next/client'
+import { getCookie } from 'cookies-next/client'
 
 function MainPageContent() {
   const [user, setUser] = useState<User | null>(null);
@@ -21,15 +21,13 @@ function MainPageContent() {
   const [showTimeoutPopup, setShowTimeoutPopup] = useState(false);
   const [timeoutCountdown, setTimeoutCountdown] = useState(60);
   const searchParams = useSearchParams();
-  const getCookie = useGetCookie();
+  const userId = getCookie('user_id');
+  const userName = getCookie('user_name');
 
   useEffect(() => {
     const getUserInfo = async () => {
       try {
-
-          const userId = getCookie('user_id');
-          const userName = getCookie('user_name');
-
+        
           console.log('userId cookie', userId);
           console.log('userName cookie', userName);
 
