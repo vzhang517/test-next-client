@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { User } from '@/types/auth';
 import { checkAdmin, extractUserIdFromUrl } from '@/lib/userCheck';
 import { startSessionTimeout, stopSessionTimeout, handleSessionResponse } from '@/lib/refresh';
@@ -12,6 +12,7 @@ import ContainerRecertificationDetails from '@/_components/ContainerRecertificat
 import ContainerOwnerDashboard from '@/_components/ContainerOwnerDashboard';
 import SessionTimeoutPopup from '@/_components/SessionTimeoutPopup';
 import { getCookie } from 'cookies-next/client'
+import AuthenticatedLoading from '@/_components/AuthenticatedLoading';
 
 export default function MainPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -129,17 +130,20 @@ export default function MainPage() {
 
   if (isLoading) {
     return (
+      <Suspense fallback={<AuthenticatedLoading />}>
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-lg text-gray-600">Loading...</p>
         </div>
       </div>
+      </Suspense>
     );
   }
 
   if (error) {
     return (
+      <Suspense fallback={<AuthenticatedLoading />}>
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
           <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
@@ -153,11 +157,13 @@ export default function MainPage() {
           </div>
         </div>
       </div>
+      </Suspense>
     );
   }
 
   return (
     <>
+      <Suspense fallback={<AuthenticatedLoading />}>
       <Layout 
         currentSection={currentSection} 
         onSectionChange={setCurrentSection}
@@ -174,6 +180,8 @@ export default function MainPage() {
         onTimeout={handlePopupTimeout}
         timeRemaining={timeoutCountdown}
       />
+      </Suspense>
     </>
+
   );
 }
