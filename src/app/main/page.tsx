@@ -1,6 +1,5 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import { User } from '@/types/auth';
 import { checkAdmin, extractUserIdFromUrl } from '@/lib/userCheck';
@@ -21,7 +20,6 @@ export default function MainPage() {
   const [currentSection, setCurrentSection] = useState('recertification');
   const [showTimeoutPopup, setShowTimeoutPopup] = useState(false);
   const [timeoutCountdown, setTimeoutCountdown] = useState(60);
-  const searchParams = useSearchParams();
   const userId = getCookie('user_id');
   const userName = getCookie('user_name');
 
