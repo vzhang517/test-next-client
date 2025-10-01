@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { User } from '@/types/auth';
 import { checkAdmin, extractUserIdFromUrl } from '@/lib/userCheck';
 import { startSessionTimeout, stopSessionTimeout, handleSessionResponse } from '@/lib/refresh';
-import Layout from '@/_components/Layout';
+import Layout from '@/_components/MainLayout';
 import AdminView from '@/_components/AdminView';
 import Recertification from '@/_components/Recertification';
 import ContainerRecertificationDetails from '@/_components/ContainerRecertificationDetails';
@@ -25,9 +25,9 @@ export default function MainPage() {
   useEffect(() => {
     const getUserInfo = async () => {
       try {
-
-        console.log('userID stored in localStorage front page:', localStorage.getItem('userID'));
-
+        
+        const userId = localStorage.getItem('userID');
+        const userName = localStorage.getItem('userName');
 
           if (!userId || !userName) {
             setError('User ID or user name not found');

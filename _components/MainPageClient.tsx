@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { User } from '@/types/auth';
 import { startSessionTimeout, stopSessionTimeout, handleSessionResponse } from '@/lib/refresh';
-import Layout from '@/_components/Layout';
+import Layout from '@/_components/MainLayout';
 import AdminView from '@/_components/AdminView';
 import Recertification from '@/_components/Recertification';
 import ContainerRecertificationDetails from '@/_components/ContainerRecertificationDetails';

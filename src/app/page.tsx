@@ -45,7 +45,7 @@ function HomeContent() {
         const userData = await userResponse.json();
 
         localStorage.setItem('userID', userData.id);
-        console.log('userID stored in localStorage front page:', localStorage.getItem('userID'));
+        localStorage.setItem('userName', userData.name);
 
         // Set authenticated state to show success message
         setIsAuthenticated(true);
