@@ -44,13 +44,12 @@ function HomeContent() {
 
         const userData = await userResponse.json();
 
-        sessionStorage.setItem('userID', userData.id);
+        sessionStorage.setItem('userID', '12345');
         sessionStorage.setItem('userName', userData.name);
 
         // Set authenticated state to show success message
         setIsAuthenticated(true);
         setIsLoading(false);
-        router.push('/main');
 
       } catch (error) {
         console.error('Box authentication error:', error);
