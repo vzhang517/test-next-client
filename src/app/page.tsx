@@ -71,10 +71,9 @@ export default function Home() {
         setIsLoading(false);
       }
     };
-    //router.push('/main');
 
     handleBoxAuthentication();
-  }, []);
+  }, [searchParams]);
 
   return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
