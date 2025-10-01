@@ -10,7 +10,7 @@ interface LayoutProps {
   user?: User | null;
 }
 
-export default function Layout({ children, currentSection, onSectionChange, user }: LayoutProps) {
+export default function MainLayout({ children, currentSection, onSectionChange, user }: LayoutProps) {
   if (!user) {
     return null;
   }

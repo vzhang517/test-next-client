@@ -44,8 +44,8 @@ function HomeContent() {
 
         const userData = await userResponse.json();
 
-        localStorage.setItem('userID', userData.id);
-        localStorage.setItem('userName', userData.name);
+        sessionStorage.setItem('userID', userData.id);
+        sessionStorage.setItem('userName', userData.name);
 
         // Set authenticated state to show success message
         setIsAuthenticated(true);
@@ -63,8 +63,7 @@ function HomeContent() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full bg-white shadow-lg rounded-lg p-6">
+    <>
         {isLoading ? (
           // Loading state
           <AuthenticatingLoading />
@@ -76,8 +75,7 @@ function HomeContent() {
           <Authenticated />
         )
         : null}
-      </div>
-    </div>
+    </>
   );
 }
 

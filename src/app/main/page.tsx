@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { User } from '@/types/auth';
 import { checkAdmin } from '@/lib/userCheck';
 import { startSessionTimeout, stopSessionTimeout, handleSessionResponse } from '@/lib/refresh';
-import Layout from '@/_components/MainLayout';
+import MainLayout from '@/_components/MainLayout';
 import AdminView from '@/_components/AdminView';
 import Recertification from '@/_components/Recertification';
 import ContainerRecertificationDetails from '@/_components/ContainerRecertificationDetails';
@@ -19,15 +19,13 @@ export default function MainPage() {
   const [currentSection, setCurrentSection] = useState('recertification');
   const [showTimeoutPopup, setShowTimeoutPopup] = useState(false);
   const [timeoutCountdown, setTimeoutCountdown] = useState(60);
-  const userId = getCookie('user_id');
-  const userName = getCookie('user_name');
 
   useEffect(() => {
     const getUserInfo = async () => {
       try {
         
-        const userId = localStorage.getItem('userID');
-        const userName = localStorage.getItem('userName');
+        const userId = sessionStorage.getItem('userID');
+        const userName = sessionStorage.getItem('userName');
 
           if (!userId || !userName) {
             setError('User ID or user name not found');
@@ -38,7 +36,11 @@ export default function MainPage() {
           const authenticatedUser = await checkAdmin(userId, userName);
           setUser(authenticatedUser);
           setError(null);
-          setCurrentSection('admin');
+          if (authenticatedUser.isAdmin) {
+            setCurrentSection('admin');
+          } else {
+            setCurrentSection('recertification');
+          }
 
           
         } catch (error) {
@@ -156,13 +158,13 @@ export default function MainPage() {
 
   return (
     <>
-      <Layout 
+      <MainLayout 
         currentSection={currentSection} 
         onSectionChange={setCurrentSection}
         user={user}
       >
         {renderContent()}
-      </Layout>
+      </MainLayout>
       
       {/* Session Timeout Popup */}
       <SessionTimeoutPopup
