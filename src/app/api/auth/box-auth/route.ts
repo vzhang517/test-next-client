@@ -56,25 +56,24 @@ export async function POST(req: NextRequest) {
     oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
 
     await setCookie('auth_code', authCode, { res, req });
-    await getCookie('auth_code', { res, req });
+    console.log('auth_code cookie', await getCookie('auth_code', { res, req }));
 
     await setCookie('redirect_to_box_url', logoutURL, { res, req });
-    await getCookie('redirect_to_box_url', { res, req });
 
     await setCookie('user_id', userResponse.id, { res, req });
-    await getCookie('user_id', { res, req });
+    console.log('user_id cookie', await getCookie('user_id', { res, req }));
 
     await setCookie('user_name', userResponse.name || '', { res, req });
-    await getCookie('user_name', { res, req });
 
-    await setCookie('auth_code', authCode, { cookies });
-    await getCookie('auth_code', { cookies });
-    await setCookie('redirect_to_box_url', logoutURL, { cookies });
-    await getCookie('redirect_to_box_url', { cookies });
-    await setCookie('user_id', userResponse.id, { cookies });
-    await getCookie('user_id', { cookies });
-    await setCookie('user_name', userResponse.name || '', { cookies });
-    await getCookie('user_name', { cookies });
+    // await setCookie('auth_code', authCode, { cookies });
+    // console.log('auth_code cookie', await getCookie('auth_code', { res, req }));
+    // await getCookie('auth_code', { cookies });
+    // await setCookie('redirect_to_box_url', logoutURL, { cookies });
+    // await getCookie('redirect_to_box_url', { cookies });
+    // await setCookie('user_id', userResponse.id, { cookies });
+    // await getCookie('user_id', { cookies });
+    // await setCookie('user_name', userResponse.name || '', { cookies });
+    // await getCookie('user_name', { cookies });
 
     // Create response with user data
     return res;
