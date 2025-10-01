@@ -106,25 +106,27 @@ export default function MainPage() {
       case 'admin':
         if (!user.isAdmin) {
           return (
+            <Suspense fallback={<AuthenticatedLoading />}> 
             <div className="bg-white shadow rounded-lg p-6 text-center">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
               <p className="text-gray-600">Admin privileges required to access this section.</p>
             </div>
+            </Suspense>
           );
         }
-        return <AdminView userId={user.id} />;
+        return <Suspense fallback={<AuthenticatedLoading />}><AdminView userId={user.id} /></Suspense>;
       
       case 'recertification':
-        return <Recertification userId={user.id} isAdmin={user.isAdmin} />;
+        return <Suspense fallback={<AuthenticatedLoading />}><Recertification userId={user.id} isAdmin={user.isAdmin} /></Suspense>;
       
       case 'container-details':
-        return <ContainerRecertificationDetails userId={user.id} isAdmin={user.isAdmin} />;
+        return <Suspense fallback={<AuthenticatedLoading />}><ContainerRecertificationDetails userId={user.id} isAdmin={user.isAdmin} /></Suspense>;
       
       case 'container-owner-dashboard':
-        return <ContainerOwnerDashboard userId={user.id} isAdmin={user.isAdmin} />;
+        return <Suspense fallback={<AuthenticatedLoading />}><ContainerOwnerDashboard userId={user.id} isAdmin={user.isAdmin} /></Suspense>;
       
       default:
-        return <Recertification userId={user.id} isAdmin={user.isAdmin} />;
+        return <Suspense fallback={<AuthenticatedLoading />}><Recertification userId={user.id} isAdmin={user.isAdmin} /></Suspense>;
     }
   };
 
