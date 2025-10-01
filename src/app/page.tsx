@@ -6,16 +6,21 @@ import { Suspense } from 'react';
 import Authenticated from '@/_components/Authenticated';
 import AppError from '@/_components/Error';
 import AuthenticatingLoading from '@/_components/AuthenticatingLoading';
-import { useSetCookie, useGetCookie } from 'cookies-next/client'
+import {
+  useReactiveGetCookie,
+  useReactiveSetCookie,
+} from 'cookies-next';
+
 
 function HomeContent() {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const setCookie = useSetCookie();
-  const getCookie = useGetCookie();
-
+  const setCookie = useReactiveSetCookie();
+  const getCookie = useReactiveGetCookie();
+  
+  
   useEffect(() => {
     const handleBoxAuthentication = async () => {
       try {
@@ -23,7 +28,18 @@ function HomeContent() {
         const authCode = searchParams.get('auth_code');
         const logoutURL = searchParams.get('redirect_to_box_url');
 
+        
+        const now = new Date();
+        const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour in milliseconds
+        const oneDayFromNow = new Date();
+        oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
+        
         console.log('authCode from URL',authCode);
+        setCookie('auth_code',authCode, { path: '/', expires: oneHourFromNow });
+        setCookie('redirect_to_box_url',logoutURL, { path: '/', expires: oneDayFromNow });
+
+        console.log('authCode cookie',getCookie('auth_code'));
+        console.log('logoutURL cookie', getCookie('redirect_to_box_url'));
         
         if (!authCode || !logoutURL) {
           setError('No authorization code or logout URL received from Box');
@@ -31,43 +47,35 @@ function HomeContent() {
           return;
         }
 
-        console.log('fetching Box auth');
+        console.log('authCode cookie',getCookie('auth_code'));
 
+        //fetch user info from Box
         const userResponse = await fetch('/api/auth/box-auth', {
           method: 'POST',
-          body: JSON.stringify({auth_code: authCode, redirect_to_box_url: logoutURL}),
+          body: JSON.stringify({auth_code: authCode}),
         });
 
         console.log('userResponse', userResponse);
 
-        if (!userResponse.ok) {
-          setError('Failed to authenticate with Box');
-          setIsLoading(false);
-          return;
-        }
+        const userData = await userResponse.json();
 
-        //const userData = await userResponse.json();
+        console.log('userData', userData);
 
-      //console.log('userData', userData);
 
-        // const now = new Date();
-        // const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour in milliseconds
-        // const oneDayFromNow = new Date();
-        // oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
-
-        // setCookie('auth_code',authCode, { path: '/', expires: oneHourFromNow });
-        // setCookie('redirect_to_box_url',logoutURL, { path: '/', expires: oneDayFromNow });
+        setCookie('auth_code',authCode, { path: '/', expires: oneHourFromNow });
+        setCookie('redirect_to_box_url',logoutURL, { path: '/', expires: oneDayFromNow });
 
         console.log('authCode cookie',getCookie('auth_code'));
         console.log('logoutURL cookie', getCookie('redirect_to_box_url'));
 
 
-        // setCookie('user_id',userData.id, { path: '/', expires: oneHourFromNow });
-        // setCookie('user_name',userData.name || '', { path: '/', expires: oneHourFromNow });
+        setCookie('user_id',userData.id, { path: '/', expires: oneHourFromNow });
+        setCookie('user_name',userData.name || '', { path: '/', expires: oneHourFromNow });
 
         // Set authenticated state to show success message
         setIsAuthenticated(true);
         setIsLoading(false);
+
         
       } catch (error) {
         console.error('Box authentication error:', error);
@@ -75,7 +83,7 @@ function HomeContent() {
         setIsLoading(false);
       }
     };
-
+    //router.push('/main');
 
     handleBoxAuthentication();
   }, []);
@@ -89,8 +97,7 @@ function HomeContent() {
         ) : error ? (
           // Error state
           <AppError error={error} />
-        ) 
-        : isAuthenticated ? (
+        ) : isAuthenticated ? (
           // Authenticated state
           <Authenticated />
         )

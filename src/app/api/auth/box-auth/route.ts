@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BoxClient, BoxOAuth, OAuthConfig} from 'box-typescript-sdk-gen';
-import { cookies } from 'next/headers';
-import { getCookie, setCookie} from 'cookies-next/server';
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const res = new NextResponse();
-    const body = await req.json();
+    console.log('testing api');
+    const body = await request.json();
     console.log('body:', body);
     const authCode = body.auth_code;
     console.log('authCode:', authCode);
-    const logoutURL = body.redirect_to_box_url;
-    console.log('logoutURL:', logoutURL);
 
     if (!authCode) { 
       return NextResponse.json(
@@ -52,31 +48,15 @@ export async function POST(req: NextRequest) {
     const userResponse = await client.users.getUserMe();
     console.log('User info retrieved');
 
-    const oneDayFromNow = new Date();
-    oneDayFromNow.setDate(oneDayFromNow.getDate() + 1);
-
-    await setCookie('auth_code', authCode, { res, req });
-    console.log('auth_code cookie', await getCookie('auth_code', { res, req }));
-
-    await setCookie('redirect_to_box_url', logoutURL, { res, req });
-
-    await setCookie('user_id', userResponse.id, { res, req });
-    console.log('user_id cookie', await getCookie('user_id', { res, req }));
-
-    await setCookie('user_name', userResponse.name || '', { res, req });
-
-    await setCookie('auth_code', authCode, { cookies });
-    console.log('auth_code cookie', await getCookie('auth_code', { res, req }));
-
-    await setCookie('redirect_to_box_url', logoutURL, { cookies });
-
-    await setCookie('user_id', userResponse.id, { cookies });
-
-    await setCookie('user_name', userResponse.name || '', { cookies });
-
+    console.log('userResponse in route', userResponse);
 
     // Create response with user data
-    return res;
+    return new NextResponse(JSON.stringify(userResponse), {
+      status: 200,
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      });
 
   } catch (error) {
     console.error('Box authentication error:', error);
