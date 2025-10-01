@@ -70,7 +70,6 @@ function HomeContent() {
         // Set authenticated state to show success message
         //setIsAuthenticated(true);
         setIsLoading(false);
-        router.push('/main');
         
       } catch (error) {
         console.error('Box authentication error:', error);
@@ -81,6 +80,7 @@ function HomeContent() {
 
 
     handleBoxAuthentication();
+    router.push('/main');
   }, []);
 
   return (
