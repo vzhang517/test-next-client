@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { User } from '@/types/auth';
 import { checkAdmin } from '@/lib/userCheck';
 import { startSessionTimeout, stopSessionTimeout, handleSessionResponse } from '@/lib/refresh';
@@ -19,6 +20,7 @@ export default function MainPage() {
   const [currentSection, setCurrentSection] = useState('recertification');
   const [showTimeoutPopup, setShowTimeoutPopup] = useState(false);
   const [timeoutCountdown, setTimeoutCountdown] = useState(60);
+  const router = useRouter();
 
   useEffect(() => {
     const getUserInfo = async () => {
@@ -52,8 +54,9 @@ export default function MainPage() {
       getUserInfo();
 
     try {
-      // Start session timeout service
+      // Start session timeout service with router
       startSessionTimeout({
+        router,
         onShowPopup: () => {
           console.log('Showing session timeout popup');
           setShowTimeoutPopup(true);
@@ -65,7 +68,6 @@ export default function MainPage() {
         },
         onLogout: () => {
           console.log('Logging out due to session timeout');
-          setError('Session expired. Closing application...');
         },
         onExtendSession: () => {
           console.log('Session extended by user');

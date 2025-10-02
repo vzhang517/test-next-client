@@ -52,9 +52,6 @@ export default function Recertification({ userId, isAdmin }: RecertificationProp
     <div className="bg-white shadow rounded-lg">
       <div className="px-6 py-4 border-b border-gray-200">
         <h2 className="text-2xl font-bold text-gray-900">Recertification Management</h2>
-        <p className="mt-2 text-sm text-gray-600">
-          {isAdmin ? 'Admin View' : 'User View'} - User ID: {userId}
-        </p>
       </div>
 
       <div className="p-6">

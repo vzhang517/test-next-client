@@ -20,7 +20,7 @@ export default function MainLayout({ children, currentSection, onSectionChange, 
       <Navbar 
         isAdmin={user.isAdmin} 
         currentSection={currentSection} 
-        userId={user.id}
+        userName={user.name}
         onSectionChange={onSectionChange}
       />
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">

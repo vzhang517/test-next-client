@@ -7,12 +7,16 @@ interface SessionTimeoutOptions {
   onHidePopup?: () => void;
   onLogout?: () => void;
   onExtendSession?: () => void;
+  onSignout?: () => void;
+  router?: any; // Next.js router instance
 }
 
 class SessionTimeoutService {
   private intervalId: NodeJS.Timeout | null = null;
   private popupTimeoutId: NodeJS.Timeout | null = null;
   private options: SessionTimeoutOptions;
+  private readonly SESSION_DURATION = 300000; // 5 minutes in milliseconds
+  private readonly SESSION_STORAGE_KEY = 'sessionStartTime';
 
   constructor(options: SessionTimeoutOptions = {}) {
     this.options = options;
@@ -20,7 +24,7 @@ class SessionTimeoutService {
 
   /**
    * Start the session timeout service
-   * Shows popup 1 minute before hourly timeout
+   * Shows popup 1 minute before session timeout
    */
   start() {
     if (this.intervalId) {
@@ -28,12 +32,80 @@ class SessionTimeoutService {
       return;
     }
 
-    console.log('Starting session timeout service - will show popup every 59 minutes');
+    console.log('Starting session timeout service - will show popup 1 minute before timeout');
     
-    // Set up hourly popup (59 minutes = 3540000ms)
-    this.intervalId = setInterval(() => {
+    // Initialize or get existing session start time
+    this.initializeSession();
+    
+    // Check if session has already expired
+    if (this.isSessionExpired()) {
+      console.log('Session has already expired, triggering logout');
+      this.handleLogout();
+      return;
+    }
+
+    // Set up the timeout based on remaining time
+    this.scheduleNextTimeout();
+  }
+
+  /**
+   * Initialize session start time if not already set
+   */
+  private initializeSession() {
+    const existingStartTime = sessionStorage.getItem(this.SESSION_STORAGE_KEY);
+    if (!existingStartTime) {
+      const startTime = Date.now();
+      sessionStorage.setItem(this.SESSION_STORAGE_KEY, startTime.toString());
+      console.log('Session started at:', new Date(startTime).toISOString());
+    } else {
+      console.log('Existing session found, started at:', new Date(parseInt(existingStartTime)).toISOString());
+    }
+  }
+
+  /**
+   * Check if the current session has expired
+   */
+  private isSessionExpired(): boolean {
+    const startTime = parseInt(sessionStorage.getItem(this.SESSION_STORAGE_KEY) || '0');
+    const elapsed = Date.now() - startTime;
+    return elapsed >= this.SESSION_DURATION;
+  }
+
+  /**
+   * Get remaining session time in milliseconds
+   */
+  private getRemainingTime(): number {
+    const startTime = parseInt(sessionStorage.getItem(this.SESSION_STORAGE_KEY) || '0');
+    const elapsed = Date.now() - startTime;
+    return Math.max(0, this.SESSION_DURATION - elapsed);
+  }
+
+  /**
+   * Schedule the next timeout based on remaining session time
+   */
+  private scheduleNextTimeout() {
+    const remainingTime = this.getRemainingTime();
+    const popupTime = remainingTime - 60000; // Show popup 1 minute before expiry
+
+    if (popupTime <= 0) {
+      // Less than 1 minute remaining, show popup immediately
       this.showTimeoutPopup();
-    }, 300000); // 59 minutes = 3540000ms
+    } else {
+      // Schedule popup for the appropriate time
+      console.log(`Scheduling popup in ${Math.round(popupTime / 1000)} seconds`);
+      this.intervalId = setTimeout(() => {
+        this.showTimeoutPopup();
+      }, popupTime);
+    }
+  }
+
+  /**
+   * Reset the session start time (called when extending session)
+   */
+  private resetSession() {
+    const startTime = Date.now();
+    sessionStorage.setItem(this.SESSION_STORAGE_KEY, startTime.toString());
+    console.log('Session reset at:', new Date(startTime).toISOString());
   }
 
   /**
@@ -41,7 +113,7 @@ class SessionTimeoutService {
    */
   stop() {
     if (this.intervalId) {
-      clearInterval(this.intervalId);
+      clearTimeout(this.intervalId);
       this.intervalId = null;
     }
     if (this.popupTimeoutId) {
@@ -81,6 +153,15 @@ class SessionTimeoutService {
       this.popupTimeoutId = null;
     }
 
+    // Clear the main timeout
+    if (this.intervalId) {
+      clearTimeout(this.intervalId);
+      this.intervalId = null;
+    }
+
+    // Reset the session start time
+    this.resetSession();
+
     // Call extend session callback
     if (this.options.onExtendSession) {
       this.options.onExtendSession();
@@ -90,6 +171,9 @@ class SessionTimeoutService {
     if (this.options.onHidePopup) {
       this.options.onHidePopup();
     }
+
+    // Schedule the next timeout
+    this.scheduleNextTimeout();
   }
 
   /**
@@ -132,26 +216,26 @@ class SessionTimeoutService {
    * Handle logout when token refresh fails
    */
   private async handleLogout() {
+    
     console.log('Timeout, logging out user...');
     
-    // Clear all authentication cookies
+    // Clear all authentication data
     sessionStorage.removeItem('auth_code');
     sessionStorage.removeItem('user_id');
     sessionStorage.removeItem('user_name');
+    sessionStorage.removeItem(this.SESSION_STORAGE_KEY);
 
-    const logoutURL = sessionStorage.getItem('logout_url');
-    
-    if (logoutURL) {
-      // Call logout callback if provided
-      if (this.options.onLogout) {
-        this.options.onLogout();
-      }
-      
-      // Redirect to Box logout URL
-      window.location.href = logoutURL;
+    // Call logout callback if provided
+    if (this.options.onLogout) {
+      this.options.onLogout();
+    }
+
+    // Redirect to signout page using Next.js router
+    if (this.options.router) {
+      this.options.router.push('/signout');
     } else {
-      // Fallback: close the tab
-      window.close();
+      // Fallback to window.location if router not available
+      window.location.replace('/signout');
     }
   }
 
@@ -160,6 +244,23 @@ class SessionTimeoutService {
    */
   isRunning(): boolean {
     return this.intervalId !== null;
+  }
+
+  /**
+   * Get current session status for debugging
+   */
+  getSessionStatus() {
+    const startTime = parseInt(sessionStorage.getItem(this.SESSION_STORAGE_KEY) || '0');
+    const elapsed = Date.now() - startTime;
+    const remaining = this.getRemainingTime();
+    
+    return {
+      startTime: new Date(startTime).toISOString(),
+      elapsed: Math.round(elapsed / 1000),
+      remaining: Math.round(remaining / 1000),
+      isExpired: this.isSessionExpired(),
+      isRunning: this.isRunning()
+    };
   }
 }
 
@@ -205,6 +306,27 @@ export function handleSessionResponse(response: 'yes' | 'no') {
       sessionTimeoutService.handleNo();
     }
   }
+}
+
+/**
+ * Check if a session exists in storage
+ */
+export function hasActiveSession(): boolean {
+  const startTime = sessionStorage.getItem('sessionStartTime');
+  if (!startTime) return false;
+  
+  const elapsed = Date.now() - parseInt(startTime);
+  return elapsed < 300000; // 5 minutes
+}
+
+/**
+ * Get current session status
+ */
+export function getCurrentSessionStatus() {
+  if (sessionTimeoutService) {
+    return sessionTimeoutService.getSessionStatus();
+  }
+  return null;
 }
 
 export default SessionTimeoutService;
