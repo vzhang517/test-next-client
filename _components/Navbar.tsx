@@ -14,13 +14,13 @@ export default function Navbar({ isAdmin, currentSection, userName, onSectionCha
 
   const adminNavItems = [
     { key: 'admin', label: 'Admin Dashboard' },
-    { key: 'container-dashboard', label: 'Recertification' },
+    { key: 'container-dashboard', label: 'Container Dashboard' },
     { key: 'container-details', label: 'Container Recertification Details' },
     { key: 'container-owner-dashboard', label: 'Container Owner Dashboard' },
   ];
 
   const userNavItems = [
-    { key: 'recertification', label: 'Recertification' },
+    { key: 'container-dashboard', label: 'Container Dashboard' },
     { key: 'container-details', label: 'Container Recertification Details' },
     { key: 'container-owner-dashboard', label: 'Container Owner Dashboard' },
   ];
@@ -40,7 +40,7 @@ export default function Navbar({ isAdmin, currentSection, userName, onSectionCha
                   alt="State Street Logo" 
                   className="h-8 mr-3"
                 />
-                <h1 className="text-xl font-bold">Folder Recertification</h1>
+                <h1 className="text-xl font-bold">Container Recertificiation</h1>
               </div>
             </div>
 

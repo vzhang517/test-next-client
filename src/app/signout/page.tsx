@@ -19,16 +19,11 @@ export default function SignoutScreen() {
         <div className="mt-4 text-center">
           <h3 className="text-lg font-medium text-gray-900">You have been signed out</h3>
           <p className="mt-2 text-sm text-gray-500">
-            Your session has expired or there was an error and you have been automatically signed out for security reasons.
+            Your session has expired or there was an error
           </p>
           <p className="mt-1 text-xs text-gray-400">
-            Please close the window and restart the integration from Box.
+            You have been automatically signed out for security reasons. Please close the window and restart the integration from Box.
           </p>
-          <button
-            className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-          >
-            Close Window
-          </button>
         </div>
       </div>
     </div>

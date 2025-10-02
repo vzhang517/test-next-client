@@ -11,7 +11,6 @@ import Recertification from '@/_components/Recertification';
 import ContainerRecertificationDetails from '@/_components/ContainerRecertificationDetails';
 import ContainerOwnerDashboard from '@/_components/ContainerOwnerDashboard';
 import SessionTimeoutPopup from '@/_components/SessionTimeoutPopup';
-import { getCookie } from 'cookies-next/client'
 
 export default function MainPage() {
   const [user, setUser] = useState<User | null>(null);

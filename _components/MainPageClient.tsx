@@ -16,7 +16,7 @@ interface MainPageClientProps {
   initialSection?: string;
 }
 
-export default function MainPageClient({ user, initialSection = 'recertification' }: MainPageClientProps) {
+export default function MainPageClient({ user, initialSection = 'container-dashboard' }: MainPageClientProps) {
   const [currentSection, setCurrentSection] = useState(initialSection);
   const [showTimeoutPopup, setShowTimeoutPopup] = useState(false);
   const [timeoutCountdown, setTimeoutCountdown] = useState(60);
@@ -77,7 +77,7 @@ export default function MainPageClient({ user, initialSection = 'recertification
         }
         return <AdminView userId={user.id} />;
       
-      case 'recertification':
+      case 'container-dashboard':
         return <Recertification userId={user.id} isAdmin={user.isAdmin} />;
       
       case 'container-details':
