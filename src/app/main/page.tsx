@@ -1,25 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { User } from '@/types/auth';
 import { checkAdmin } from '@/lib/userCheck';
-import { startSessionTimeout, stopSessionTimeout, handleSessionResponse } from '@/lib/refresh';
 import MainLayout from '@/_components/MainLayout';
 import AdminView from '@/_components/AdminView';
-import Recertification from '@/_components/Recertification';
+import ContainerRecertification from '@/_components/ContainerRecertification';
 import ContainerRecertificationDetails from '@/_components/ContainerRecertificationDetails';
 import ContainerOwnerDashboard from '@/_components/ContainerOwnerDashboard';
-import SessionTimeoutPopup from '@/_components/SessionTimeoutPopup';
-
 export default function MainPage() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentSection, setCurrentSection] = useState('recertification');
-  const [showTimeoutPopup, setShowTimeoutPopup] = useState(false);
-  const [timeoutCountdown, setTimeoutCountdown] = useState(60);
-  const router = useRouter();
 
   useEffect(() => {
     const getUserInfo = async () => {
@@ -40,7 +33,7 @@ export default function MainPage() {
           if (authenticatedUser.isAdmin) {
             setCurrentSection('admin');
           } else {
-            setCurrentSection('recertification');
+            setCurrentSection('container-owner');
           }
 
           
@@ -50,54 +43,11 @@ export default function MainPage() {
           setIsLoading(false);
         }
       };
-      getUserInfo();
-
-    try {
-      // Start session timeout service with router
-      startSessionTimeout({
-        router,
-        onShowPopup: () => {
-          console.log('Showing session timeout popup');
-          setShowTimeoutPopup(true);
-          setTimeoutCountdown(60); // Reset countdown to 60 seconds
-        },
-        onHidePopup: () => {
-          console.log('Hiding session timeout popup');
-          setShowTimeoutPopup(false);
-        },
-        onLogout: () => {
-          console.log('Logging out due to session timeout');
-        },
-        onExtendSession: () => {
-          console.log('Session extended by user');
-          // Session is extended, popup will be hidden automatically
-        }
-      });
-
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Authentication failed');
-    } finally {
+      
+      getUserInfo()
       setIsLoading(false);
-    }
-
-    // Cleanup: stop session timeout when component unmounts
-    return () => {
-      stopSessionTimeout();
-    };
   }, []);
 
-  // Handle popup responses
-  const handlePopupYes = () => {
-    handleSessionResponse('yes');
-  };
-
-  const handlePopupNo = () => {
-    handleSessionResponse('no');
-  };
-
-  const handlePopupTimeout = () => {
-    handleSessionResponse('no'); // Treat timeout same as "No"
-  };
 
   const renderContent = () => {
     if (!user) return null;
@@ -114,17 +64,17 @@ export default function MainPage() {
         }
         return <AdminView userId={user.id} />;
       
-      case 'recertification':
-        return <Recertification userId={user.id} isAdmin={user.isAdmin} />;
+      case 'container-recertification':
+        return <ContainerRecertification userId={user.id} isAdmin={user.isAdmin} />;
       
-      case 'container-details':
+      case 'container-recertification-details':
         return <ContainerRecertificationDetails userId={user.id} isAdmin={user.isAdmin} />;
       
-      case 'container-owner-dashboard':
+      case 'container-owner':
         return <ContainerOwnerDashboard userId={user.id} isAdmin={user.isAdmin} />;
       
       default:
-        return <Recertification userId={user.id} isAdmin={user.isAdmin} />;
+        return <ContainerOwnerDashboard userId={user.id} isAdmin={user.isAdmin} />;
     }
   };
 
@@ -167,14 +117,6 @@ export default function MainPage() {
         {renderContent()}
       </MainLayout>
       
-      {/* Session Timeout Popup */}
-      <SessionTimeoutPopup
-        isOpen={showTimeoutPopup}
-        onYes={handlePopupYes}
-        onNo={handlePopupNo}
-        onTimeout={handlePopupTimeout}
-        timeRemaining={timeoutCountdown}
-      />
     </>
   );
 }

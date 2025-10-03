@@ -2,12 +2,12 @@
 
 import { useState } from 'react';
 
-interface ContainerDashboardProps {
+interface ContainerRecertificationProps {
   userId: string;
   isAdmin: boolean;
 }
 
-export default function ContainerDashboard({ userId, isAdmin }: ContainerDashboardProps) {
+export default function ContainerRecertification({ userId, isAdmin }: ContainerRecertificationProps) {
   const [containers, setContainers] = useState([
     {
       id: '823940587',
@@ -64,7 +64,7 @@ export default function ContainerDashboard({ userId, isAdmin }: ContainerDashboa
   return (
     <div className="bg-white shadow rounded-lg">
       <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-2xl font-bold text-gray-900">Container Dashboard</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Container Recertification</h2>
       </div>
 
       <div className="p-6">

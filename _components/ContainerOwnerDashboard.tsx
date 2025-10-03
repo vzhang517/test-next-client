@@ -21,22 +21,22 @@ export default function ContainerOwnerDashboard({ userId, isAdmin }: ContainerOw
 
   // Mock data - in a real app, this would come from an API
   const mockContainers: Container[] = [
-    { id: 'CTR-001', name: 'Production Database Container', dueDate: '2024-01-15', status: 'Overdue' },
-    { id: 'CTR-002', name: 'Development Environment', dueDate: '2024-02-20', status: 'Incomplete' },
-    { id: 'CTR-003', name: 'Staging Server Container', dueDate: '2024-01-30', status: 'Recertified' },
-    { id: 'CTR-004', name: 'Test Environment', dueDate: '2024-03-10', status: 'Incomplete' },
-    { id: 'CTR-005', name: 'Backup Storage Container', dueDate: '2024-01-10', status: 'Overdue' },
-    { id: 'CTR-006', name: 'Monitoring System', dueDate: '2024-02-15', status: 'Recertified' },
-    { id: 'CTR-007', name: 'Security Scanner', dueDate: '2024-01-25', status: 'Overdue' },
-    { id: 'CTR-008', name: 'Log Aggregator', dueDate: '2024-03-05', status: 'Incomplete' },
-    { id: 'CTR-0011', name: 'Production Database Container', dueDate: '2024-01-15', status: 'Overdue' },
-    { id: 'CTR-0012', name: 'Development Environment', dueDate: '2024-02-20', status: 'Incomplete' },
-    { id: 'CTR-0013', name: 'Staging Server Container', dueDate: '2024-01-30', status: 'Recertified' },
-    { id: 'CTR-0014', name: 'Test Environment', dueDate: '2024-03-10', status: 'Incomplete' },
-    { id: 'CTR-0015', name: 'Backup Storage Container', dueDate: '2024-01-10', status: 'Overdue' },
-    { id: 'CTR-0016', name: 'Monitoring System', dueDate: '2024-02-15', status: 'Recertified' },
-    { id: 'CTR-0017', name: 'Security Scanner', dueDate: '2024-01-25', status: 'Overdue' },
-    { id: 'CTR-0018', name: 'Log Aggregator', dueDate: '2024-03-05', status: 'Incomplete' },
+    { id: '89230984875', name: 'Production Database Container', dueDate: '2024-01-15', status: 'Overdue' },
+    { id: '45893405968', name: 'Development Environment', dueDate: '2024-02-20', status: 'Incomplete' },
+    { id: '93840985493', name: 'Staging Server Container', dueDate: '2024-01-30', status: 'Recertified' },
+    { id: '29381029383', name: 'Test Environment', dueDate: '2024-03-10', status: 'Incomplete' },
+    { id: '22338903238', name: 'Backup Storage Container', dueDate: '2024-01-10', status: 'Overdue' },
+    { id: '56273646452', name: 'Monitoring System', dueDate: '2024-02-15', status: 'Recertified' },
+    { id: '98984290909', name: 'Security Scanner', dueDate: '2024-01-25', status: 'Overdue' },
+    { id: '89237862387', name: 'Log Aggregator', dueDate: '2024-03-05', status: 'Incomplete' },
+    { id: '83472094712', name: 'Production Database Container', dueDate: '2024-01-15', status: 'Overdue' },
+    { id: '85238409275', name: 'Development Environment', dueDate: '2024-02-20', status: 'Incomplete' },
+    { id: '72873847763', name: 'Staging Server Container', dueDate: '2024-01-30', status: 'Recertified' },
+    { id: '73028478090', name: 'Test Environment', dueDate: '2024-03-10', status: 'Incomplete' },
+    { id: '80099003472', name: 'Backup Storage Container', dueDate: '2024-01-10', status: 'Overdue' },
+    { id: '38793047762', name: 'Monitoring System', dueDate: '2024-02-15', status: 'Recertified' },
+    { id: '83352676777', name: 'Security Scanner', dueDate: '2024-01-25', status: 'Overdue' },
+    { id: '83948823512', name: 'Log Aggregator', dueDate: '2024-03-05', status: 'Incomplete' },
   ];
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export default function ContainerOwnerDashboard({ userId, isAdmin }: ContainerOw
       {/* Header */}
       <div className="bg-white shadow rounded-lg p-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Container Owner Dashboard</h1>
-        <p className="text-gray-600">Track and manage container recertification status</p>
+        <p className="text-gray-600">Track container recertification status</p>
       </div>
 
       {/* Status Overview Cards */}

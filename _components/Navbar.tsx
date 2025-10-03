@@ -14,15 +14,14 @@ export default function Navbar({ isAdmin, currentSection, userName, onSectionCha
 
   const adminNavItems = [
     { key: 'admin', label: 'Admin Dashboard' },
-    { key: 'container-dashboard', label: 'Container Dashboard' },
     { key: 'container-details', label: 'Container Recertification Details' },
     { key: 'container-owner-dashboard', label: 'Container Owner Dashboard' },
+    { key: 'container-recertification', label: 'Container Recertification' },
   ];
 
   const userNavItems = [
-    { key: 'container-dashboard', label: 'Container Dashboard' },
-    { key: 'container-details', label: 'Container Recertification Details' },
     { key: 'container-owner-dashboard', label: 'Container Owner Dashboard' },
+    { key: 'container-recertification', label: 'Container Recertification' },
   ];
 
   const navItems = isAdmin ? adminNavItems : userNavItems;
