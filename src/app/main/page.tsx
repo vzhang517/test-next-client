@@ -3,49 +3,57 @@
 import { useState, useEffect } from 'react';
 import { User } from '@/types/auth';
 import { checkAdmin } from '@/lib/userCheck';
+import { NavigationProvider } from '@/lib/NavigationContext';
 import MainLayout from '@/_components/MainLayout';
-import AdminView from '@/_components/AdminView';
 import ContainerRecertification from '@/_components/ContainerRecertification';
-import ContainerRecertificationDetails from '@/_components/ContainerRecertificationDetails';
+import ContainerRecertificationHistory from '@/_components/ContainerRecertificationHistory';
 import ContainerOwnerDashboard from '@/_components/ContainerOwnerDashboard';
+import Support from '@/_components/Support';
 export default function MainPage() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentSection, setCurrentSection] = useState('recertification');
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // Ensure we're on the client side
+    setIsClient(true);
+    
     const getUserInfo = async () => {
       try {
+        // Only access sessionStorage on the client side
+        if (typeof window === 'undefined') {
+          setIsLoading(false);
+          return;
+        }
         
         const userId = sessionStorage.getItem('userID');
         const userName = sessionStorage.getItem('userName');
 
-          if (!userId || !userName) {
-            setError('User ID or user name not found');
-            setIsLoading(false);
-            return;
-          }
-
-          const authenticatedUser = await checkAdmin(userId, userName);
-          setUser(authenticatedUser);
-          setError(null);
-          if (authenticatedUser.isAdmin) {
-            setCurrentSection('admin');
-          } else {
-            setCurrentSection('container-owner');
-          }
-
-          
-        } catch (error) {
-          console.error('Box authentication error:', error);
-          setError(error instanceof Error ? error.message : 'Authentication failed');
+        if (!userId || !userName) {
+          setError('User ID or user name not found');
           setIsLoading(false);
+          return;
         }
-      };
+
+        const authenticatedUser = await checkAdmin(userId, userName);
+        setUser(authenticatedUser);
+        setError(null);
+        if (authenticatedUser.isAdmin) {
+          setCurrentSection('admin');
+        } else {
+          setCurrentSection('container-owner');
+        }
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Box authentication error:', error);
+        setError(error instanceof Error ? error.message : 'Authentication failed');
+        setIsLoading(false);
+      }
+    };
       
-      getUserInfo()
-      setIsLoading(false);
+    getUserInfo();
   }, []);
 
 
@@ -53,32 +61,58 @@ export default function MainPage() {
     if (!user) return null;
 
     switch (currentSection) {
-      case 'admin':
-        if (!user.isAdmin) {
-          return (
-            <div className="bg-white shadow rounded-lg p-6 text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
-              <p className="text-gray-600">Admin privileges required to access this section.</p>
-            </div>
-          );
-        }
-        return <AdminView userId={user.id} />;
+      // case 'search':
+      //   if (!user.isAdmin) {
+      //     return (
+      //       <div className="bg-white shadow rounded-lg p-6 text-center">
+      //         <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
+      //         <p className="text-gray-600">Admin privileges required to access this section.</p>
+      //       </div>
+      //     );
+      //   }
+      //   return <AdminView userId={user.id} />;
+      
+      // case 'container-reassignment':
+      //   if (!user.isAdmin) {
+      //     return (
+      //       <div className="bg-white shadow rounded-lg p-6 text-center">
+      //         <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
+      //         <p className="text-gray-600">Admin privileges required to access this section.</p>
+      //       </div>
+      //     );
+      //   }
+      //   return <AdminView userId={user.id} />;
+
+      // case 'email-templates':
+      //   if (!user.isAdmin) {
+      //     return (
+      //       <div className="bg-white shadow rounded-lg p-6 text-center">
+      //         <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
+      //         <p className="text-gray-600">Admin privileges required to access this section.</p>
+      //       </div>
+      //     );
+      //   }
+      //   return <AdminView userId={user.id} />;
       
       case 'container-recertification':
         return <ContainerRecertification userId={user.id} isAdmin={user.isAdmin} />;
       
-      case 'container-recertification-details':
-        return <ContainerRecertificationDetails userId={user.id} isAdmin={user.isAdmin} />;
+      case 'container-recertification-history':
+        return <ContainerRecertificationHistory userId={user.id} isAdmin={user.isAdmin} />;
       
       case 'container-owner':
         return <ContainerOwnerDashboard userId={user.id} isAdmin={user.isAdmin} />;
+      
+      case 'support':
+        return <Support />;
       
       default:
         return <ContainerOwnerDashboard userId={user.id} isAdmin={user.isAdmin} />;
     }
   };
 
-  if (isLoading) {
+  // Don't render anything until we're on the client side
+  if (!isClient || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -108,7 +142,7 @@ export default function MainPage() {
   }
 
   return (
-    <>
+    <NavigationProvider onSectionChange={setCurrentSection}>
       <MainLayout 
         currentSection={currentSection} 
         onSectionChange={setCurrentSection}
@@ -116,7 +150,6 @@ export default function MainPage() {
       >
         {renderContent()}
       </MainLayout>
-      
-    </>
+    </NavigationProvider>
   );
 }

@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigation } from '@/lib/NavigationContext';
 
 interface Container {
-  id: string;
-  name: string;
-  dueDate: string;
+  container_folder_id: string;
+  folder_name: string;
+  due_date: string;
   status: 'Overdue' | 'Incomplete' | 'Recertified';
 }
 
@@ -17,37 +18,64 @@ interface ContainerOwnerDashboardProps {
 export default function ContainerOwnerDashboard({ userId, isAdmin }: ContainerOwnerDashboardProps) {
   const [containers, setContainers] = useState<Container[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'All' | 'Overdue' | 'Incomplete' | 'Recertified'>('All');
-
-  // Mock data - in a real app, this would come from an API
-  const mockContainers: Container[] = [
-    { id: '89230984875', name: 'Production Database Container', dueDate: '2024-01-15', status: 'Overdue' },
-    { id: '45893405968', name: 'Development Environment', dueDate: '2024-02-20', status: 'Incomplete' },
-    { id: '93840985493', name: 'Staging Server Container', dueDate: '2024-01-30', status: 'Recertified' },
-    { id: '29381029383', name: 'Test Environment', dueDate: '2024-03-10', status: 'Incomplete' },
-    { id: '22338903238', name: 'Backup Storage Container', dueDate: '2024-01-10', status: 'Overdue' },
-    { id: '56273646452', name: 'Monitoring System', dueDate: '2024-02-15', status: 'Recertified' },
-    { id: '98984290909', name: 'Security Scanner', dueDate: '2024-01-25', status: 'Overdue' },
-    { id: '89237862387', name: 'Log Aggregator', dueDate: '2024-03-05', status: 'Incomplete' },
-    { id: '83472094712', name: 'Production Database Container', dueDate: '2024-01-15', status: 'Overdue' },
-    { id: '85238409275', name: 'Development Environment', dueDate: '2024-02-20', status: 'Incomplete' },
-    { id: '72873847763', name: 'Staging Server Container', dueDate: '2024-01-30', status: 'Recertified' },
-    { id: '73028478090', name: 'Test Environment', dueDate: '2024-03-10', status: 'Incomplete' },
-    { id: '80099003472', name: 'Backup Storage Container', dueDate: '2024-01-10', status: 'Overdue' },
-    { id: '38793047762', name: 'Monitoring System', dueDate: '2024-02-15', status: 'Recertified' },
-    { id: '83352676777', name: 'Security Scanner', dueDate: '2024-01-25', status: 'Overdue' },
-    { id: '83948823512', name: 'Log Aggregator', dueDate: '2024-03-05', status: 'Incomplete' },
-  ];
+  const [sortColumn, setSortColumn] = useState<string>('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const isRequestInProgress = useRef(false);
+  const { navigateToRecertificationHistory } = useNavigation();
 
   useEffect(() => {
-    // Simulate API call
-    const timer = setTimeout(() => {
-      setContainers(mockContainers);
-      setIsLoading(false);
-    }, 1000);
+    const getContainerOwnerDashboard = async () => {
+      // Prevent multiple simultaneous requests
+      if (isRequestInProgress.current) {
+        return;
+      }
 
-    return () => clearTimeout(timer);
-  }, []);
+      try {
+        isRequestInProgress.current = true;
+        setError(null); // Clear any previous errors
+        setIsLoading(true);
+        
+        // Build query parameters
+        const params = new URLSearchParams({
+          user: userId,
+          isAdmin: isAdmin.toString()
+        });
+        
+        if (sortColumn) {
+          params.append('column', sortColumn);
+          params.append('order', sortOrder);
+        }
+
+        const containerOwnerDashboard = await fetch(`/api/get-container-owner-dashboard?${params.toString()}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!containerOwnerDashboard.ok) {
+          throw new Error(`HTTP error! status: ${containerOwnerDashboard.status}`);
+        }
+
+        const containerOwnerDashboardData = await containerOwnerDashboard.json();
+        console.log('containerOwnerDashboardData:', containerOwnerDashboardData);
+        setContainers(containerOwnerDashboardData);
+        setIsLoading(false);
+
+      } catch (error) {
+        console.error('Error fetching container owner dashboard:', error);
+        setError(error instanceof Error ? error.message : 'Failed to fetch container data');
+        setContainers([]); // Clear containers on error
+        setIsLoading(false);
+      } finally {
+        isRequestInProgress.current = false;
+      }
+    };
+
+    getContainerOwnerDashboard();
+  }, [userId, isAdmin, sortColumn, sortOrder]);
 
   const filteredContainers = filter === 'All' 
     ? containers 
@@ -83,6 +111,41 @@ export default function ContainerOwnerDashboard({ userId, isAdmin }: ContainerOw
   };
 
   const statusCounts = getStatusCounts();
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      // If clicking the same column, toggle the order
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      // If clicking a different column, set it as the new sort column with ascending order
+      setSortColumn(column);
+      setSortOrder('asc');
+    }
+  };
+
+  const getSortIcon = (column: string) => {
+    if (sortColumn !== column) {
+      return (
+        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+        </svg>
+      );
+    }
+    
+    return sortOrder === 'asc' ? (
+      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+      </svg>
+    ) : (
+      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+      </svg>
+    );
+  };
+
+  const handleRowClick = (containerId: string) => {
+    navigateToRecertificationHistory(containerId);
+  };
 
   if (isLoading) {
     return (
@@ -178,7 +241,10 @@ export default function ContainerOwnerDashboard({ userId, isAdmin }: ContainerOw
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-lg font-medium text-gray-900">Container Status Tracker</h2>
+            <div>
+              <h2 className="text-lg font-medium text-gray-900">Container Status Tracker</h2>
+              <p className="text-sm text-gray-500 mt-1">Click on any row to view recertification history</p>
+            </div>
             <div className="mt-4 sm:mt-0">
               <select
                 value={filter}
@@ -199,30 +265,58 @@ export default function ContainerOwnerDashboard({ userId, isAdmin }: ContainerOw
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Container ID
+                  <button
+                    onClick={() => handleSort('container_folder_id')}
+                    className="flex items-center space-x-1 hover:text-gray-700 focus:outline-none focus:text-gray-700"
+                  >
+                    <span>Container ID</span>
+                    {getSortIcon('container_folder_id')}
+                  </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Container Name
+                  <button
+                    onClick={() => handleSort('name')}
+                    className="flex items-center space-x-1 hover:text-gray-700 focus:outline-none focus:text-gray-700"
+                  >
+                    <span>Container Name</span>
+                    {getSortIcon('name')}
+                  </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Due Date
+                  <button
+                    onClick={() => handleSort('due_date')}
+                    className="flex items-center space-x-1 hover:text-gray-700 focus:outline-none focus:text-gray-700"
+                  >
+                    <span>Due Date</span>
+                    {getSortIcon('due_date')}
+                  </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  <button
+                    onClick={() => handleSort('status')}
+                    className="flex items-center space-x-1 hover:text-gray-700 focus:outline-none focus:text-gray-700"
+                  >
+                    <span>Status</span>
+                    {getSortIcon('status')}
+                  </button>
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredContainers.map((container) => (
-                <tr key={container.id} className="hover:bg-gray-50">
+                <tr 
+                  key={container.container_folder_id} 
+                  className="hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                  onClick={() => handleRowClick(container.container_folder_id)}
+                >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {container.id}
+                    {container.container_folder_id}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {container.name}
+                    {container.folder_name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {container.dueDate}
+                    {container.due_date}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={getStatusBadge(container.status)}>
@@ -235,15 +329,29 @@ export default function ContainerOwnerDashboard({ userId, isAdmin }: ContainerOw
           </table>
         </div>
 
-        {filteredContainers.length === 0 && (
+        {(filteredContainers.length === 0 || error) && (
           <div className="text-center py-12">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No containers found</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {filter === 'All' ? 'No containers available.' : `No containers with status "${filter}".`}
-            </p>
+            {error ? (
+              <>
+                <svg className="mx-auto h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <h3 className="mt-2 text-sm font-medium text-red-900">Error fetching or loading containers</h3>
+                <p className="mt-1 text-sm text-red-600">
+                  {error}
+                </p>
+              </>
+            ) : (
+              <>
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                </svg>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No containers found</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  {filter === 'All' ? 'No containers.' : `No containers with status "${filter}".`}
+                </p>
+              </>
+            )}
           </div>
         )}
       </div>

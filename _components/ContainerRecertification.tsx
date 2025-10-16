@@ -7,177 +7,367 @@ interface ContainerRecertificationProps {
   isAdmin: boolean;
 }
 
-export default function ContainerRecertification({ userId, isAdmin }: ContainerRecertificationProps) {
-  const [containers, setContainers] = useState([
-    {
-      id: '823940587',
-      name: 'Security Container Alpha',
-      type: 'High Security',
-      status: 'Certified',
-      lastAudit: '2024-01-15',
-      nextAudit: '2024-07-15',
-    },
-    {
-      id: '893029586',
-      name: 'Data Processing Container Beta',
-      type: 'Standard',
-      status: 'Pending Review',
-      lastAudit: '2023-12-01',
-      nextAudit: '2024-03-01',
-    },
-    {
-      id: '673478273',
-      name: 'Backup Storage Container Gamma',
-      type: 'Archive',
-      status: 'Overdue',
-      lastAudit: '2023-06-15',
-      nextAudit: '2024-01-15',
-    },
-  ]);
+interface CollaborationRecord {
+  id: string;
+  collaborator: string;
+  collaboratorType: 'Internal' | 'External';
+  permissionLevel: 'Co-Owner' | 'Editor' | 'Viewer/Uploader' | 'Delete';
+  collaborationId: string;
+  invitedDate: string;
+  path: string;
+  isSelected?: boolean;
+}
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Certified':
-        return 'bg-green-100 text-green-800';
-      case 'Pending Review':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Overdue':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+
+export default function ContainerRecertification({ userId, isAdmin }: ContainerRecertificationProps) {
+  const [collaborations, setCollaborations] = useState<CollaborationRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searchContainerId, setSearchContainerId] = useState<string>('');
+  const [confirmedContainerId, setConfirmedContainerId] = useState<string>('');
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const [isCertified, setIsCertified] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const getContainerCollaborations = async (containerId: string) => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      
+      const params = new URLSearchParams({
+        containerId: containerId
+      });
+
+      const response = await fetch(`/api/get-container-recertification-collaborations?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Container collaborations data:', data);
+      
+      // Transform the API data to match our interface
+      const transformedData: CollaborationRecord[] = data.collaborations.map((item: any) => ({
+        id: item.id?.toString() || '',
+        collaborator: item.collaborator_name || 'Unknown User',
+        collaboratorType: item.collaborator_type || 'External',
+        permissionLevel: mapPermissionLevel(item.collaborator_permission || ''),
+        collaborationId: item.collaboration_id?.toString() || '',
+        invitedDate: item.invited_date || '',
+        path: item.path || 'Unknown Path'
+      }));
+
+      setCollaborations(transformedData);
+      setConfirmedContainerId(containerId); // Only update confirmed container ID after successful response
+      setIsLoading(false);
+
+    } catch (error) {
+      console.error('Error fetching container collaborations:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch collaboration data');
+      setCollaborations([]);
+      setIsLoading(false);
     }
   };
 
-  const getComplianceColor = (level: string) => {
+  const handleSearch = () => {
+    if (searchContainerId && searchContainerId.trim()) {
+      setHasSearched(true);
+      getContainerCollaborations(searchContainerId.trim());
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!isCertified) {
+      return; // Do nothing if not certified
+    }
+
+    if (!confirmedContainerId) {
+      alert('Please search for a container first.');
+      return;
+    }
+
+    // Get selected collaborations
+    const selectedCollaborations = collaborations.filter(collab => collab.isSelected);
+    
+    if (selectedCollaborations.length === 0) {
+      alert('Please select at least one collaboration to update.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Compile the data structure
+      const updateData = {
+        'user-id': parseInt(userId),
+        'container-id': parseInt(confirmedContainerId),
+        'collaborations': selectedCollaborations.map(collab => [
+          collab.collaborationId,
+          collab.permissionLevel
+        ])
+      };
+
+      const response = await fetch('/api/update-container-recertification-collaborations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Navigate to RecertificationComplete component
+        window.location.href = '/recertification-complete';
+      } else {
+        throw new Error(result.error || 'Failed to update collaborations');
+      }
+
+    } catch (error) {
+      console.error('Error submitting recertification:', error);
+      alert('Failed to submit recertification. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const mapPermissionLevel = (permission: string): 'Co-Owner' | 'Editor' | 'Viewer/Uploader' | 'Delete' => {
+    const lowerPermission = permission?.toLowerCase() || '';
+    
+    if (lowerPermission.includes('owner') || lowerPermission.includes('admin')) {
+      return 'Co-Owner';
+    } else if (lowerPermission.includes('edit') || lowerPermission.includes('write')) {
+      return 'Editor';
+    } else if (lowerPermission.includes('view') || lowerPermission.includes('read') || lowerPermission.includes('upload')) {
+      return 'Viewer/Uploader';
+    } else {
+      return 'Viewer/Uploader'; // Default fallback
+    }
+  };
+
+  const handlePermissionChange = (id: string, newPermission: 'Co-Owner' | 'Editor' | 'Viewer/Uploader' | 'Delete') => {
+    setCollaborations(prev => 
+      prev.map(collab => 
+        collab.id === id 
+          ? { ...collab, permissionLevel: newPermission }
+          : collab
+      )
+    );
+  };
+
+  const handleCheckboxChange = (id: string) => {
+    setCollaborations(prev => 
+      prev.map(collab => 
+        collab.id === id 
+          ? { ...collab, isSelected: !collab.isSelected }
+          : collab
+      )
+    );
+  };
+
+  const getCollaboratorTypeColor = (type: string) => {
+    return type === 'Internal' 
+      ? 'bg-blue-100 text-blue-800' 
+      : 'bg-green-100 text-green-800';
+  };
+
+  const getPermissionLevelColor = (level: string) => {
     switch (level) {
-      case 'Tier 1':
-        return 'bg-blue-100 text-blue-800';
-      case 'Tier 2':
+      case 'Editor':
         return 'bg-purple-100 text-purple-800';
-      case 'Tier 3':
+      case 'Viewer':
+        return 'bg-gray-100 text-gray-800';
+      case 'Uploader':
         return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        {/* Header and Search Section */}
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Container Recertification</h1>
+            <p className="text-gray-600">Manage collaboration access and permissions</p>
+          </div>
+        </div>
+
+        {/* Loading State */}
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mb-6"></div>
+            <div className="space-y-4">
+              <div className="h-4 bg-gray-200 rounded w-full"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white shadow rounded-lg">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h2 className="text-2xl font-bold text-gray-900">Container Recertification</h2>
+    <div className="space-y-6">
+      {/* Header, Search, and Current Container Section */}
+      <div className="bg-white shadow rounded-lg p-6">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Container Recertification</h1>
+          <p className="text-gray-600">Manage collaboration access and permissions</p>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row sm:items-end gap-4 mb-6">
+          <div className="flex-1">
+            <label htmlFor="containerId" className="block text-sm font-medium text-gray-700 mb-2">
+              Container ID
+            </label>
+            <input
+              type="text"
+              id="containerId"
+              value={searchContainerId}
+              onChange={(e) => setSearchContainerId(e.target.value)}
+              placeholder="Enter container ID to search..."
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+          </div>
+          <div className="flex items-end">
+            <button
+              onClick={handleSearch}
+              disabled={!searchContainerId || !searchContainerId.trim() || isLoading}
+              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            >
+              {isLoading ? 'Searching...' : 'Search'}
+            </button>
+          </div>
+        </div>
+
+        {/* Current Container Display */}
+        {confirmedContainerId && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-4">
+            <div className="flex items-center space-x-3">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-blue-900 mb-1">Currently Recertifying</h3>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-blue-700">Container ID:</span>
+                  <span className="px-2 py-1 bg-blue-100 text-blue-900 font-mono text-sm rounded border border-blue-200">
+                    {confirmedContainerId}
+                  </span>
+                </div>
+              </div>
+              <div className="flex-shrink-0">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="p-6">
-        {/* Summary Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-green-50 p-4 rounded-lg">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Certified</p>
-                <p className="text-2xl font-bold text-green-600">1</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-yellow-50 p-4 rounded-lg">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Pending Review</p>
-                <p className="text-2xl font-bold text-yellow-600">1</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-red-50 p-4 rounded-lg">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Overdue</p>
-                <p className="text-2xl font-bold text-red-600">1</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-500">Total Containers</p>
-                <p className="text-2xl font-bold text-blue-600">3</p>
-              </div>
+      {/* Collaborations Table */}
+      <div className="bg-white shadow rounded-lg">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-medium text-gray-900">Collaboration Records</h2>
+              <p className="text-sm text-gray-500 mt-1">Select and update collaboration permissions</p>
             </div>
           </div>
         </div>
 
-        {/* Containers Table */}
-        <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-300">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Container ID
+                  Update
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
+                  Collaborator
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  Collaborator Type
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Next Audit
+                  Permission Level
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  Collaboration ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Invited Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-0">
+                  Path
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {containers.map((container) => (
-                <tr key={container.id}>
+              {collaborations.map((collaboration) => (
+                <tr key={collaboration.id} className="hover:bg-gray-50 transition-colors duration-150">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{container.id}</div>
+                    <input
+                      type="checkbox"
+                      checked={collaboration.isSelected || false}
+                      onChange={() => handleCheckboxChange(collaboration.id)}
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {collaboration.collaborator}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{container.name}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(container.status)}`}>
-                      {container.status}
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getCollaboratorTypeColor(collaboration.collaboratorType)}`}>
+                      {collaboration.collaboratorType}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {container.nextAudit}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <select
+                      value={collaboration.permissionLevel}
+                      onChange={(e) => handlePermissionChange(collaboration.id, e.target.value as 'Co-Owner' | 'Editor' | 'Viewer/Uploader' | 'Delete')}
+                      className="text-sm text-gray-900 border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="Co-Owner">Co-Owner</option>
+                      <option value="Editor">Editor</option>
+                      <option value="Viewer/Uploader">Viewer/Uploader</option>
+                      <option value="Delete">Delete</option>
+                    </select>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-4">
-                      View Details
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {collaboration.collaborationId}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {formatDate(collaboration.invitedDate)}
+                  </td>
+                  <td className="px-6 py-4 min-w-0 text-sm text-gray-900 whitespace-nowrap" title={collaboration.path}>
+                    {collaboration.path}
                   </td>
                 </tr>
               ))}
@@ -185,19 +375,81 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
           </table>
         </div>
 
+        {/* Error or Empty State */}
+        {(collaborations.length === 0 || error || !hasSearched) && (
+          <div className="text-center py-12">
+            {!hasSearched ? (
+              <>
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">Search for a container ID</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Enter a container ID above to view collaboration records.
+                </p>
+              </>
+            ) : error ? (
+              <>
+                <svg className="mx-auto h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                <h3 className="mt-2 text-sm font-medium text-red-900">Error loading collaborations</h3>
+                <p className="mt-1 text-sm text-red-600">
+                  {error}
+                </p>
+              </>
+            ) : (
+              <>
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                </svg>
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No collaborations found</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  No collaboration records are available for this container.
+                </p>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Visual Spacer */}
+        <div className="border-t border-gray-200">
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-center">
+              <div className="flex-1 border-t border-gray-200"></div>
+              <div className="px-4">
+                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+              </div>
+              <div className="flex-1 border-t border-gray-200"></div>
+            </div>
+          </div>
+        </div>
+
         {/* Action Buttons */}
-        <div className="mt-6 flex justify-end space-x-4">
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-            Add New Container
-          </button>
-          <button className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
-            Schedule Audit
-          </button>
-          {isAdmin && (
-            <button className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors">
-              Generate Report
-            </button>
-          )}
+        <div className="px-6 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="certify"
+                checked={isCertified}
+                onChange={(e) => setIsCertified(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="certify" className="ml-2 text-sm text-gray-700">
+                I certify this container
+              </label>
+            </div>
+            <div className="flex space-x-4">
+              <button 
+                onClick={handleSubmit}
+                disabled={!isCertified || isSubmitting}
+                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit'}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -13,14 +13,18 @@ export default function Navbar({ isAdmin, currentSection, userName, onSectionCha
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const adminNavItems = [
-    { key: 'admin', label: 'Admin Dashboard' },
-    { key: 'container-details', label: 'Container Recertification Details' },
     { key: 'container-owner-dashboard', label: 'Container Owner Dashboard' },
+    { key: 'container-recertification-history', label: 'Container Recertification History' },
     { key: 'container-recertification', label: 'Container Recertification' },
+      // Add container re-assignment
+     // Add search
+     // Add email templates
+    
   ];
 
   const userNavItems = [
     { key: 'container-owner-dashboard', label: 'Container Owner Dashboard' },
+    { key: 'container-recertification-history', label: 'Container Recertification History' },
     { key: 'container-recertification', label: 'Container Recertification' },
   ];
 
