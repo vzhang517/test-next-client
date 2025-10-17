@@ -23,6 +23,7 @@ export async function POST(request: NextRequest) {
 
     const updateResponse = await fetch('https://nav.ossoccer.com/update_container_recertification_collaborations/', {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
 
     const confirmResponse = await fetch('https://nav.ossoccer.com/confirm_container_recertification/', {
       method: 'POST',
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
