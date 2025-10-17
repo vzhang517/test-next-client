@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Sending update data to API:', updateData);
 
-    const updateResponse = await fetch('https://nav.ossoccer.com/update-container-recertification-collaborations/', {
+    const updateResponse = await fetch('https://nav.ossoccer.com/update_container_recertification_collaborations/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Sending confirm data to API:', confirmData);
 
-    const confirmResponse = await fetch('https://nav.ossoccer.com/confirm-container-recertification/', {
+    const confirmResponse = await fetch('https://nav.ossoccer.com/confirm_container_recertification/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
