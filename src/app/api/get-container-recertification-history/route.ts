@@ -8,9 +8,9 @@ export async function GET(request: NextRequest) {
     const isAdmin = searchParams.get('isAdmin');
     const exportParam = searchParams.get('export');
 
-    if (!userId) {
+    if (!userId || !containerId || !isAdmin) {
       return NextResponse.json(
-        { error: 'User ID is required' },
+        { error: 'missing required parameter' },
         { status: 400 }
       );
     }

@@ -24,9 +24,9 @@ export async function GET(request: NextRequest) {
     if (order) {
       apiUrl += `&order=${order}`;
     }
-    // if (isAdmin !== null) {
-    //   apiUrl += `&isAdmin=${isAdmin}`;
-    // }
+    if (isAdmin !== null) {
+      apiUrl += `&is-admin=${isAdmin}`;
+    }
 
     console.log('apiUrl:', apiUrl);
 
