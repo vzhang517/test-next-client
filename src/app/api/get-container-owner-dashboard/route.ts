@@ -6,7 +6,6 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get('user');
     const column = searchParams.get('column');
     const order = searchParams.get('order');
-    const isAdmin = searchParams.get('isAdmin');
 
     if (!userId) {
       return NextResponse.json(
@@ -23,9 +22,6 @@ export async function GET(request: NextRequest) {
     }
     if (order) {
       apiUrl += `&order=${order}`;
-    }
-    if (isAdmin !== null) {
-      apiUrl += `&is-admin=${isAdmin}`;
     }
 
     console.log('apiUrl:', apiUrl);

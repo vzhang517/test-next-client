@@ -34,37 +34,8 @@ export async function POST(request: NextRequest) {
       throw new Error(`Update API error! status: ${updateResponse.status}`);
     }
 
-    const updateResult = await updateResponse.json();
-    console.log('Update API response:', updateResult);
-
-    // Second API call to confirm recertification
-    const confirmData = {
-      'user-id': userId,
-      'container-id': containerId
-    };
-
-    console.log('Sending confirm data to API:', confirmData);
-
-    const confirmResponse = await fetch('https://nav.ossoccer.com/confirm_container_recertification/', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(confirmData),
-    });
-
-    if (!confirmResponse.ok) {
-      throw new Error(`Confirm API error! status: ${confirmResponse.status}`);
-    }
-
-    const confirmResult = await confirmResponse.json();
-    console.log('Confirm API response:', confirmResult);
-
     return NextResponse.json({
-      success: true,
-      updateResult,
-      confirmResult
+      success: true
     }, {
       status: 200,
       headers: {

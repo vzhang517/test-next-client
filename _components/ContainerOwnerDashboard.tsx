@@ -15,7 +15,7 @@ interface ContainerOwnerDashboardProps {
   isAdmin: boolean;
 }
 
-export default function ContainerOwnerDashboard({ userId, isAdmin }: ContainerOwnerDashboardProps) {
+export default function ContainerOwnerDashboard({ userId }: ContainerOwnerDashboardProps) {
   const [containers, setContainers] = useState<Container[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,8 +39,7 @@ export default function ContainerOwnerDashboard({ userId, isAdmin }: ContainerOw
         
         // Build query parameters
         const params = new URLSearchParams({
-          user: userId,
-          isAdmin: isAdmin.toString()
+          user: userId
         });
         
         if (sortColumn) {
@@ -75,7 +74,7 @@ export default function ContainerOwnerDashboard({ userId, isAdmin }: ContainerOw
     };
 
     getContainerOwnerDashboard();
-  }, [userId, isAdmin, sortColumn, sortOrder]);
+  }, [userId, sortColumn, sortOrder]);
 
   const filteredContainers = filter === 'All' 
     ? containers 

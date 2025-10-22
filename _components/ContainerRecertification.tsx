@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface ContainerRecertificationProps {
   userId: string;
@@ -28,6 +29,7 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [isCertified, setIsCertified] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const router = useRouter();
 
   const getContainerCollaborations = async (containerId: string) => {
     try {
@@ -129,7 +131,7 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
       
       if (result.success) {
         // Navigate to RecertificationComplete component
-        window.location.href = '/recertification-complete';
+        router.push('/recertification-complete');
       } else {
         throw new Error(result.error || 'Failed to update collaborations');
       }
