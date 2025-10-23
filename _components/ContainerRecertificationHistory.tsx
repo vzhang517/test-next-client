@@ -9,16 +9,16 @@ interface ContainerRecertificationHistoryProps {
 }
 
 interface RecertificationHistoryEntry {
-  containerId: string;
-  recertificationId: string;
-  actorId: string;
-  objectId: string;
+  id: number;
+  recertificationId: number;
+  actorId: number;
+  objectId: number;
   objectType: string;
   actionTaken: string;
   priorValue: string;
   newValue: string;
   comment: string;
-  dateOfAction: string;
+  createdAt: string;
 }
 
 export default function ContainerRecertificationHistory({ userId, isAdmin }: ContainerRecertificationHistoryProps) {
@@ -69,17 +69,17 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
       console.log('Container history data:', data);
       
       // Transform the API data to match our interface
-      const transformedData: RecertificationHistoryEntry[] = data.history?.map((item: any) => ({
-        containerId: item.container_id?.toString() || containerId,
-        recertificationId: item.recertification_id?.toString() || '',
-        actorId: item.actor_id?.toString() || '',
-        objectId: item.object_id?.toString() || '',
+      const transformedData: RecertificationHistoryEntry[] = data?.map((item: any) => ({
+        id: item.id || 0,
+        recertificationId: item.recertification_id || 0,
+        actorId: item.actor_id || 0,
+        objectId: item.object_id || 0,
         objectType: item.object_type || 'Unknown',
         actionTaken: item.action_taken || 'Unknown',
         priorValue: item.prior_value || '',
         newValue: item.new_value || '',
         comment: item.comment || '',
-        dateOfAction: item.date_of_action || item.timestamp || ''
+        createdAt: item.created_at || ''
       })) || [];
 
       setHistoryEntries(transformedData);
@@ -88,8 +88,8 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
       // Auto-expand the most recent year if there are entries
       if (transformedData.length > 0) {
         const years = transformedData
-          .filter(entry => entry.dateOfAction)
-          .map(entry => entry.dateOfAction.split('-')[0])
+          .filter(entry => entry.createdAt)
+          .map(entry => entry.createdAt.split('-')[0])
           .filter(year => year && year.length === 4);
         
         if (years.length > 0) {
@@ -153,8 +153,8 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
 
   // Group entries by year
   const groupedEntries = historyEntries.reduce((acc, entry) => {
-    if (entry.dateOfAction) {
-      const year = entry.dateOfAction.split('-')[0];
+    if (entry.createdAt) {
+      const year = entry.createdAt.split('-')[0];
       if (year && year.length === 4) { // Ensure we have a valid year
         if (!acc[year]) {
           acc[year] = [];
@@ -180,40 +180,19 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
 
   const getActionColor = (action: string) => {
     switch (action.toLowerCase()) {
-      case 'created':
-        return 'bg-green-100 text-green-800';
-      case 'updated':
-      case 'modified':
-        return 'bg-blue-100 text-blue-800';
-      case 'rotated':
-        return 'bg-purple-100 text-purple-800';
-      case 'archived':
-        return 'bg-gray-100 text-gray-800';
-      case 'rolled back':
-        return 'bg-red-100 text-red-800';
-      default:
+      case 'delete collaboration':
         return 'bg-yellow-100 text-yellow-800';
+      case 'update collaboration':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getObjectTypeColor = (type: string) => {
     switch (type.toLowerCase()) {
-      case 'security policy':
-        return 'bg-red-100 text-red-800';
-      case 'access control':
-        return 'bg-orange-100 text-orange-800';
-      case 'encryption key':
-        return 'bg-purple-100 text-purple-800';
-      case 'backup schedule':
-        return 'bg-green-100 text-green-800';
-      case 'monitoring rule':
+      case 'collaboration':
         return 'bg-blue-100 text-blue-800';
-      case 'log retention':
-        return 'bg-indigo-100 text-indigo-800';
-      case 'audit trail':
-        return 'bg-pink-100 text-pink-800';
-      case 'configuration':
-        return 'bg-teal-100 text-teal-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -396,7 +375,7 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Container ID
+                            ID
                           </th>
                           <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Recertification ID
@@ -423,15 +402,15 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
                             Comment
                           </th>
                           <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Date of Action
+                            Created At
                           </th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {groupedEntries[year].map((entry, index) => (
-                          <tr key={`${entry.recertificationId}-${index}`} className="hover:bg-gray-50">
+                          <tr key={`${entry.id}-${index}`} className="hover:bg-gray-50">
                             <td className="px-3 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">{entry.containerId}</div>
+                              <div className="text-sm font-medium text-gray-900">{entry.id}</div>
                             </td>
                             <td className="px-3 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-900">{entry.recertificationId}</div>
@@ -468,7 +447,7 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
                               </div>
                             </td>
                             <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {entry.dateOfAction}
+                              {entry.createdAt}
                             </td>
                           </tr>
                         ))}

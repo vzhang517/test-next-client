@@ -16,8 +16,6 @@ export async function GET(request: NextRequest) {
     // Build the API URL with sorting parameters
     let apiUrl = `https://nav.ossoccer.com/container/${containerId}/collaborations/`;
 
-    
-
     console.log('apiUrl:', apiUrl);
 
     const response = await fetch(apiUrl, {
