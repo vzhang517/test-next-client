@@ -145,7 +145,7 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
 
     } catch (error) {
       console.error('Error generating report:', error);
-      setError(error instanceof Error ? error.message : 'Failed to generate report');
+      setError(error instanceof Error ? error.message : 'Failed to generate report, seach for a containerID again to restart');
     } finally {
       setIsLoading(false);
     }
@@ -293,6 +293,15 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
             <div>
               <h2 className="text-lg font-medium text-gray-900">Container Recertification History Records</h2>
               <p className="text-sm text-gray-500 mt-1">Records are grouped by year</p>
+            </div>
+            <div className="mt-4 sm:mt-0">
+              <button 
+                onClick={handleGenerateReport}
+                disabled={!confirmedContainerId || isLoading}
+                className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              >
+                {isLoading ? 'Generating...' : 'Generate Report'}
+              </button>
             </div>
           </div>
         </div>
@@ -461,16 +470,6 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="mt-6 flex justify-end space-x-4">
-          <button 
-            onClick={handleGenerateReport}
-            disabled={!confirmedContainerId || isLoading}
-            className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {isLoading ? 'Generating...' : 'Generate Report'}
-          </button>
-        </div>
         </div>
       </div>
     </div>

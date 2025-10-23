@@ -12,7 +12,7 @@ interface CollaborationRecord {
   id: string;
   collaborator: string;
   collaboratorType: 'Managed' | 'External';
-  permissionLevel: 'Co-Owner' | 'Editor' | 'Viewer/Uploader' | 'Delete';
+  permissionLevel: 'co-owner' | 'editor' | 'viewer' | 'previewer' | 'uploader' | 'previewer_uploader' | 'viewer_uploader' | 'delete';
   collaborationId: string;
   invitedDate: string;
   path: string;
@@ -144,21 +144,31 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
     }
   };
 
-  const mapPermissionLevel = (permission: string): 'Co-Owner' | 'Editor' | 'Viewer/Uploader' | 'Delete' => {
+  const mapPermissionLevel = (permission: string): 'co-owner' | 'editor' | 'viewer' | 'previewer' | 'uploader' | 'previewer_uploader' | 'viewer_uploader' | 'delete' => {
     const lowerPermission = permission?.toLowerCase() || '';
     
     if (lowerPermission.includes('owner') || lowerPermission.includes('admin')) {
-      return 'Co-Owner';
+      return 'co-owner';
     } else if (lowerPermission.includes('edit') || lowerPermission.includes('write')) {
-      return 'Editor';
-    } else if (lowerPermission.includes('view') || lowerPermission.includes('read') || lowerPermission.includes('upload')) {
-      return 'Viewer/Uploader';
+      return 'editor';
+    } else if (lowerPermission.includes('view') && lowerPermission.includes('upload')) {
+      return 'viewer_uploader';
+    } else if (lowerPermission.includes('preview') && lowerPermission.includes('upload')) {
+      return 'previewer_uploader';
+    } else if (lowerPermission.includes('view') || lowerPermission.includes('read')) {
+      return 'viewer';
+    } else if (lowerPermission.includes('preview')) {
+      return 'previewer';
+    } else if (lowerPermission.includes('upload')) {
+      return 'uploader';
+    } else if (lowerPermission.includes('delete')) {
+      return 'delete';
     } else {
-      return 'Viewer/Uploader'; // Default fallback
+      return 'viewer'; // Default fallback
     }
   };
 
-  const handlePermissionChange = (id: string, newPermission: 'Co-Owner' | 'Editor' | 'Viewer/Uploader' | 'Delete') => {
+  const handlePermissionChange = (id: string, newPermission: 'co-owner' | 'editor' | 'viewer' | 'previewer' | 'uploader' | 'previewer_uploader' | 'viewer_uploader' | 'delete') => {
     setCollaborations(prev => 
       prev.map(collab => 
         collab.id === id 
@@ -186,12 +196,6 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
 
   const getPermissionLevelColor = (level: string) => {
     switch (level) {
-      case 'Editor':
-        return 'bg-purple-100 text-purple-800';
-      case 'Viewer':
-        return 'bg-gray-100 text-gray-800';
-      case 'Uploader':
-        return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -353,13 +357,17 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
                   <td className="px-6 py-4 whitespace-nowrap">
                     <select
                       value={collaboration.permissionLevel}
-                      onChange={(e) => handlePermissionChange(collaboration.id, e.target.value as 'Co-Owner' | 'Editor' | 'Viewer/Uploader' | 'Delete')}
+                      onChange={(e) => handlePermissionChange(collaboration.id, e.target.value as 'co-owner' | 'editor' | 'viewer' | 'previewer' | 'uploader' | 'previewer_uploader' | 'viewer_uploader' | 'delete')}
                       className="text-sm text-gray-900 border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
-                      <option value="Co-Owner">Co-Owner</option>
-                      <option value="Editor">Editor</option>
-                      <option value="Viewer/Uploader">Viewer/Uploader</option>
-                      <option value="Delete">Delete</option>
+                      <option value="co-owner">Co-Owner</option>
+                      <option value="editor">Editor</option>
+                      <option value="viewer">Viewer</option>
+                      <option value="previewer">Previewer</option>
+                      <option value="uploader">Uploader</option>
+                      <option value="previewer_uploader">Previewer Uploader</option>
+                      <option value="viewer_uploader">Viewer Uploader</option>
+                      <option value="delete">Delete</option>
                     </select>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

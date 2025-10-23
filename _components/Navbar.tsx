@@ -16,7 +16,7 @@ export default function Navbar({ isAdmin, currentSection, userName, onSectionCha
     { key: 'container-owner-dashboard', label: 'Container Owner Dashboard' },
     { key: 'container-recertification-history', label: 'Container Recertification History' },
     { key: 'container-recertification', label: 'Container Recertification' },
-      // Add container re-assignment
+    { key: 'container-reassignment', label: 'Container Reassignment' },
      // Add search
      // Add email templates
     
