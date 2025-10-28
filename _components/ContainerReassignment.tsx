@@ -22,26 +22,54 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
   const [error, setError] = useState<string | null>(null);
   const [containerInfo, setContainerInfo] = useState<ContainerInfo | null>(null);
 
-  // Test data for container information
-  const testContainerData: ContainerInfo = {
-    containerRecertificationId: '839240389483',
-    dueDate: '2025-10-15',
-    status: 'Overdue',
-    primaryContainerOwner: 'John Smith'
+  const getContainerInfo = async (containerId: string) => {
+    try {
+      setError(null);
+      setIsLoading(true);
+      
+      const params = new URLSearchParams({
+        containerId: containerId,
+        userId: userId
+      });
+
+      const response = await fetch(`/api/list-container-ownership?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Container collaborations data:', data);
+      
+      // Transform the API data to match our interface
+      const transformedData: ContainerInfo = data.container.map((item: any) => ({
+        containerRecertificationId: item.id?.toString() || '',
+        dueDate: item.due_date || '',
+        status: item.collaborator_type || 'Status Unknown',
+        primaryContainerOwner: item.primary_container_owner || '',
+      }));
+
+      setContainerInfo(transformedData);
+      setConfirmedContainerId(containerId); // Only update confirmed container ID after successful response
+      setIsLoading(false);
+
+    } catch (error) {
+      console.error('Error fetching container collaborations:', error);
+      setError(error instanceof Error ? error.message : 'Failed to fetch collaboration data');
+      setContainerInfo(null);
+      setIsLoading(false);
+    }
   };
 
   const handleSearch = () => {
     if (searchContainerId && searchContainerId.trim()) {
       setHasSearched(true);
-      setIsLoading(true);
-      setError(null);
-      
-      // Simulate API call delay
-      setTimeout(() => {
-        setConfirmedContainerId(searchContainerId.trim());
-        setContainerInfo(testContainerData);
-        setIsLoading(false);
-      }, 1000);
+      getContainerInfo(searchContainerId.trim());
     }
   };
 

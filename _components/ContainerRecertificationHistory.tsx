@@ -50,7 +50,7 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
       
       const params = new URLSearchParams({
         containerId: containerId,
-        user: userId,
+        userId: userId,
         isAdmin: isAdmin.toString()
       });
 
@@ -276,6 +276,10 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
                   <span className="px-2 py-1 bg-blue-100 text-blue-900 font-mono text-sm rounded border border-blue-200">
                     {confirmedContainerId}
                   </span>
+                  {/* <span className="text-sm font-medium text-blue-700">Container Name:</span> */}
+                  {/* <span className="px-2 py-1 bg-blue-100 text-blue-900 font-mono text-sm rounded border border-blue-200">
+                    {confirmedContainerName}
+                  </span> */}
                 </div>
               </div>
               <div className="flex-shrink-0">

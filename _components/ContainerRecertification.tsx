@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useNavigation } from '@/lib/NavigationContext';
 
 interface ContainerRecertificationProps {
   userId: string;
@@ -25,11 +26,32 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchContainerId, setSearchContainerId] = useState<string>('');
+  const [confirmedContainerName, setConfirmedContainerName] = useState<string>('');
   const [confirmedContainerId, setConfirmedContainerId] = useState<string>('');
+  const [recertificationId, setRecertificationId] = useState<string>('');
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [isCertified, setIsCertified] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState<boolean>(false);
+  const [updatedCollaborationsCount, setUpdatedCollaborationsCount] = useState<number>(0);
   const router = useRouter();
+  const { selectedContainerId, setSelectedContainerId } = useNavigation();
+  const { selectedRecertificationId, setSelectedRecertificationId } = useNavigation();
+
+  // Auto-search when a container ID is selected from the dashboard
+  useEffect(() => {
+    if (selectedContainerId && selectedRecertificationId) {
+      const containerIdString = String(selectedContainerId);
+      const recertificationIdString = String(selectedRecertificationId);
+      setSearchContainerId(containerIdString);
+      setRecertificationId(recertificationIdString);
+      setHasSearched(true);
+      getContainerCollaborations(containerIdString);
+      // Clear the selected container ID after using it
+      setSelectedContainerId(null);
+      setSelectedRecertificationId(null);
+    }
+  }, [selectedContainerId, setSelectedContainerId]);
 
   const getContainerCollaborations = async (containerId: string) => {
     try {
@@ -37,8 +59,14 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
       setIsLoading(true);
       
       const params = new URLSearchParams({
-        containerId: containerId
+        containerId: containerId,
+        userId: userId
       });
+
+      // Add recertificationId as optional parameter if it exists
+      if (recertificationId && recertificationId.trim()) {
+        params.append('recertificationId', recertificationId.trim());
+      }
 
       const response = await fetch(`/api/get-container-recertification-collaborations?${params.toString()}`, {
         method: 'GET',
@@ -65,6 +93,7 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
         path: item.path || 'Unknown Path'
       }));
 
+      setConfirmedContainerName(data.container.folder_name)
       setCollaborations(transformedData);
       setConfirmedContainerId(containerId); // Only update confirmed container ID after successful response
       setIsLoading(false);
@@ -85,20 +114,16 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
   };
 
   const handleSubmit = async () => {
-    if (!isCertified) {
-      return; // Do nothing if not certified
+    // Check if either certification is checked OR at least one collaboration is selected
+    const selectedCollaborations = collaborations.filter(collab => collab.isSelected);
+    
+    if (!isCertified && selectedCollaborations.length === 0) {
+      alert('Please either certify this container or select at least one collaboration to update.');
+      return;
     }
 
     if (!confirmedContainerId) {
       alert('Please search for a container first.');
-      return;
-    }
-
-    // Get selected collaborations
-    const selectedCollaborations = collaborations.filter(collab => collab.isSelected);
-    
-    if (selectedCollaborations.length === 0) {
-      alert('Please select at least one collaboration to update.');
       return;
     }
 
@@ -109,6 +134,7 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
       const updateData = {
         'user-id': parseInt(userId),
         'container-id': parseInt(confirmedContainerId),
+        'recertification-id': parseInt(recertificationId),
         'collaborations': selectedCollaborations.map(collab => [
           collab.collaborationId,
           collab.permissionLevel
@@ -130,8 +156,15 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
       const result = await response.json();
       
       if (result.success) {
-        // Navigate to RecertificationComplete component
-        router.push('/recertification-complete');
+        // Check if this was a collaboration-only submission (no certification)
+        if (!isCertified && selectedCollaborations.length > 0) {
+          // Show popup with number of collaborations updated
+          setUpdatedCollaborationsCount(selectedCollaborations.length);
+          setShowSuccessPopup(true);
+        } else {
+          // Navigate to RecertificationComplete component for certified submissions
+          router.push('/recertification-complete');
+        }
       } else {
         throw new Error(result.error || 'Failed to update collaborations');
       }
@@ -186,6 +219,14 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
           : collab
       )
     );
+  };
+
+  const handlePopupClose = () => {
+    setShowSuccessPopup(false);
+    // Refresh the component with the same container ID
+    if (confirmedContainerId) {
+      getContainerCollaborations(confirmedContainerId);
+    }
   };
 
   const getCollaboratorTypeColor = (type: string) => {
@@ -453,7 +494,7 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
             <div className="flex space-x-4">
               <button 
                 onClick={handleSubmit}
-                disabled={!isCertified || isSubmitting}
+                disabled={(!isCertified && collaborations.filter(collab => collab.isSelected).length === 0) || isSubmitting}
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit'}
@@ -462,6 +503,33 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
           </div>
         </div>
       </div>
+
+      {/* Success Popup */}
+      {showSuccessPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+            <div className="flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-full mb-4">
+              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 text-center mb-2">
+              Collaborations Updated Successfully
+            </h3>
+            <p className="text-sm text-gray-600 text-center mb-6">
+              {updatedCollaborationsCount} collaboration{updatedCollaborationsCount !== 1 ? 's' : ''} {updatedCollaborationsCount !== 1 ? 'were' : 'was'} updated successfully.
+            </p>
+            <div className="flex justify-center">
+              <button
+                onClick={handlePopupClose}
+                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              >
+                Ok
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

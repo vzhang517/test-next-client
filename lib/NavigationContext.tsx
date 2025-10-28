@@ -4,8 +4,10 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface NavigationContextType {
   selectedContainerId: string | null;
+  selectedRecertificationId: string | null;
   setSelectedContainerId: (containerId: string | null) => void;
-  navigateToRecertification: (containerId: string) => void;
+  setSelectedRecertificationId: (recertificationId: string | null) => void;
+  navigateToRecertification: (containerId: string, recertificationId: string) => void;
   navigateToRecertificationHistory: (containerId: string) => void;
 }
 
@@ -18,9 +20,11 @@ interface NavigationProviderProps {
 
 export function NavigationProvider({ children, onSectionChange }: NavigationProviderProps) {
   const [selectedContainerId, setSelectedContainerId] = useState<string | null>(null);
+  const [selectedRecertificationId, setSelectedRecertificationId] = useState<string | null>(null);
 
-  const navigateToRecertification = (containerId: string) => {
+  const navigateToRecertification = (containerId: string, recertificationId: string) => {
     setSelectedContainerId(containerId);
+    setSelectedRecertificationId(recertificationId);
     onSectionChange?.('container-recertification');
   };
 
@@ -33,7 +37,9 @@ export function NavigationProvider({ children, onSectionChange }: NavigationProv
     <NavigationContext.Provider 
       value={{ 
         selectedContainerId, 
+        selectedRecertificationId,
         setSelectedContainerId, 
+        setSelectedRecertificationId,
         navigateToRecertification,
         navigateToRecertificationHistory
       }}

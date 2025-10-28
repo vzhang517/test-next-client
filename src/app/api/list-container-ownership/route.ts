@@ -5,22 +5,21 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
     const containerId = searchParams.get('containerId');
-    const isAdmin = searchParams.get('isAdmin');
-    const exportParam = searchParams.get('export');
+    const includeEditor = searchParams.get('includeEditor');
 
-    if (!userId || !containerId || !isAdmin) {
+    if (!containerId) {
       return NextResponse.json(
-        { error: 'missing required parameter' },
+        { error: 'container ID is required' },
         { status: 400 }
       );
     }
 
-    // Build the API URL with parameters
-    let apiUrl = `https://nav.ossoccer.com/get_container_recertification_history/?container-id=${containerId}&user-id=${userId}&is-admin=${isAdmin}}`;
-  
+    // Build the API URL with sorting parameters
+    let apiUrl = `https://nav.ossoccer.com/list_container_ownership/?container-id=${containerId}&user-id=${userId}`;
+
     // Add export parameter if present
-    if (exportParam === 'true') {
-      apiUrl += '&export=true';
+    if (includeEditor === 'true') {
+      apiUrl += '&include-editor=true';
     }
 
     console.log('apiUrl:', apiUrl);
@@ -42,12 +41,12 @@ export async function GET(request: NextRequest) {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-      },
+    },
     });
   } catch (error) {
-    console.error('Error fetching container history from api:', error);
+    console.error('Error fetching container owner dashboard from api:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch container history data' },
+      { error: 'Failed to fetch container owner dashboard data' },
       { status: 500 }
     );
   }

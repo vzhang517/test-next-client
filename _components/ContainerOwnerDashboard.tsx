@@ -8,6 +8,7 @@ interface Container {
   folder_name: string;
   due_date: string;
   status: 'Overdue' | 'Incomplete' | 'Recertified';
+  container_recertification_id: string;
 }
 
 interface ContainerOwnerDashboardProps {
@@ -23,7 +24,7 @@ export default function ContainerOwnerDashboard({ userId }: ContainerOwnerDashbo
   const [sortColumn, setSortColumn] = useState<string>('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const isRequestInProgress = useRef(false);
-  const { navigateToRecertificationHistory } = useNavigation();
+  const { navigateToRecertification, navigateToRecertificationHistory } = useNavigation();
 
   useEffect(() => {
     const getContainerOwnerDashboard = async () => {
@@ -142,7 +143,12 @@ export default function ContainerOwnerDashboard({ userId }: ContainerOwnerDashbo
     );
   };
 
-  const handleRowClick = (containerId: string) => {
+  const handleRowClick = (containerId: string, containerRecertificationId: string) => {
+    navigateToRecertification(containerId, containerRecertificationId);
+  };
+
+  const handleHistoryClick = (e: React.MouseEvent, containerId: string) => {
+    e.stopPropagation(); // Prevent row click
     navigateToRecertificationHistory(containerId);
   };
 
@@ -242,7 +248,7 @@ export default function ContainerOwnerDashboard({ userId }: ContainerOwnerDashbo
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-lg font-medium text-gray-900">Container Status Tracker</h2>
-              <p className="text-sm text-gray-500 mt-1">Click on any row to view recertification history</p>
+              <p className="text-sm text-gray-500 mt-1">Click on any row to start recertification</p>
             </div>
             <div className="mt-4 sm:mt-0">
               <select
@@ -306,10 +312,21 @@ export default function ContainerOwnerDashboard({ userId }: ContainerOwnerDashbo
                 <tr 
                   key={container.container_folder_id} 
                   className="hover:bg-gray-50 cursor-pointer transition-colors duration-150"
-                  onClick={() => handleRowClick(container.container_folder_id)}
+                  onClick={() => handleRowClick(container.container_folder_id, container.container_recertification_id)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {container.container_folder_id}
+                    <div className="flex items-center space-x-2">
+                      <span>{container.container_folder_id}</span>
+                      <button
+                        onClick={(e) => handleHistoryClick(e, container.container_folder_id)}
+                        className="inline-flex items-center p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors duration-150"
+                        title="View History"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </button>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {container.folder_name}
