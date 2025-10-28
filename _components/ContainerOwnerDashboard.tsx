@@ -5,10 +5,10 @@ import { useNavigation } from '@/lib/NavigationContext';
 
 interface Container {
   container_folder_id: string;
+  id: string;
   folder_name: string;
   due_date: string;
   status: 'Overdue' | 'Incomplete' | 'Recertified';
-  container_recertification_id: string;
 }
 
 interface ContainerOwnerDashboardProps {
@@ -144,6 +144,7 @@ export default function ContainerOwnerDashboard({ userId }: ContainerOwnerDashbo
   };
 
   const handleRowClick = (containerId: string, containerRecertificationId: string) => {
+    console.log('handleRowClickcontainerId:', containerId);
     navigateToRecertification(containerId, containerRecertificationId);
   };
 
@@ -311,8 +312,12 @@ export default function ContainerOwnerDashboard({ userId }: ContainerOwnerDashbo
               {filteredContainers.map((container) => (
                 <tr 
                   key={container.container_folder_id} 
-                  className="hover:bg-gray-50 cursor-pointer transition-colors duration-150"
-                  onClick={() => handleRowClick(container.container_folder_id, container.container_recertification_id)}
+                  className={`transition-colors duration-150 ${
+                    container.status === 'Recertified' 
+                      ? 'cursor-default' 
+                      : 'hover:bg-gray-50 cursor-pointer'
+                  }`}
+                  onClick={container.status === 'Recertified' ? undefined : () => handleRowClick(container.container_folder_id, container.id)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     <div className="flex items-center space-x-2">

@@ -35,12 +35,14 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
   const [showSuccessPopup, setShowSuccessPopup] = useState<boolean>(false);
   const [updatedCollaborationsCount, setUpdatedCollaborationsCount] = useState<number>(0);
   const router = useRouter();
-  const { selectedContainerId, setSelectedContainerId } = useNavigation();
-  const { selectedRecertificationId, setSelectedRecertificationId } = useNavigation();
+  const { selectedContainerId, selectedRecertificationId, setSelectedContainerId, setSelectedRecertificationId } = useNavigation();
 
   // Auto-search when a container ID is selected from the dashboard
   useEffect(() => {
+    console.log('in collaboration recertification selectedContainerId:', selectedContainerId);
+    console.log('in collaboration recertification selectedRecertificationId:', selectedRecertificationId);
     if (selectedContainerId && selectedRecertificationId) {
+      console.log('selectedContainerId:', selectedContainerId);
       const containerIdString = String(selectedContainerId);
       const recertificationIdString = String(selectedRecertificationId);
       setSearchContainerId(containerIdString);
@@ -51,7 +53,7 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
       setSelectedContainerId(null);
       setSelectedRecertificationId(null);
     }
-  }, [selectedContainerId, setSelectedContainerId]);
+  }, [selectedContainerId, selectedRecertificationId, setSelectedContainerId, setSelectedRecertificationId]);
 
   const getContainerCollaborations = async (containerId: string) => {
     try {
@@ -324,6 +326,10 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
               <div className="flex-1">
                 <h3 className="text-base font-semibold text-blue-900 mb-1">Currently Recertifying</h3>
                 <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-blue-700">Container Name:</span>
+                  <span className="px-2 py-1 bg-blue-100 text-blue-900 font-mono text-sm rounded border border-blue-200">
+                    {confirmedContainerName}
+                  </span>
                   <span className="text-sm font-medium text-blue-700">Container ID:</span>
                   <span className="px-2 py-1 bg-blue-100 text-blue-900 font-mono text-sm rounded border border-blue-200">
                     {confirmedContainerId}

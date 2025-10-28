@@ -14,6 +14,11 @@ interface ContainerInfo {
   primaryContainerOwner: string;
 }
 
+interface Collaborator {
+  user_id: string;
+  user_login: string;
+}
+
 export default function ContainerReassignment({ userId, isAdmin }: ContainerReassignmentProps) {
   const [searchContainerId, setSearchContainerId] = useState<string>('');
   const [confirmedContainerId, setConfirmedContainerId] = useState<string>('');
@@ -21,6 +26,13 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [containerInfo, setContainerInfo] = useState<ContainerInfo | null>(null);
+  const [confirmedContainerName, setConfirmedContainerName] = useState<string>('');
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [showOwnershipPopup, setShowOwnershipPopup] = useState<boolean>(false);
+  const [selectedCollaborator, setSelectedCollaborator] = useState<string>('');
+  const [selectedCollaboratorLogin, setSelectedCollaboratorLogin] = useState<string>('');
+  const [ownershipChangeStatus, setOwnershipChangeStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [isChangingOwnership, setIsChangingOwnership] = useState<boolean>(false);
 
   const getContainerInfo = async (containerId: string) => {
     try {
@@ -47,14 +59,16 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
       console.log('Container collaborations data:', data);
       
       // Transform the API data to match our interface
-      const transformedData: ContainerInfo = data.container.map((item: any) => ({
-        containerRecertificationId: item.id?.toString() || '',
-        dueDate: item.due_date || '',
-        status: item.collaborator_type || 'Status Unknown',
-        primaryContainerOwner: item.primary_container_owner || '',
-      }));
+      const transformedData: ContainerInfo = {
+        containerRecertificationId: data[0].container.container_recertification_id?.toString() || '',
+        dueDate: data[0].container.due_date || '',
+        status: data[0].container.status || 'Status Unknown',
+        primaryContainerOwner: data[0].container.primary_container_owner || '',
+      };
 
+      setConfirmedContainerName(data[0].container.folder_name || '');
       setContainerInfo(transformedData);
+      setCollaborators(data[0].collaborators || []);
       setConfirmedContainerId(containerId); // Only update confirmed container ID after successful response
       setIsLoading(false);
 
@@ -70,6 +84,56 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
     if (searchContainerId && searchContainerId.trim()) {
       setHasSearched(true);
       getContainerInfo(searchContainerId.trim());
+    }
+  };
+
+  const changeContainerOwnership = async (newOwnerId: string, newOwnerLogin: string) => {
+    try {
+      setIsChangingOwnership(true);
+      setOwnershipChangeStatus('idle');
+
+      const updateData = {
+        'user-id': parseInt(userId),
+        'container-id': parseInt(confirmedContainerId),
+        'newOwnerId': newOwnerId,
+        'newOwnerLogin': newOwnerLogin
+      };
+
+      const response = await fetch('/api/api/change-container-ownership', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      setOwnershipChangeStatus('success');
+    } catch (error) {
+      console.error('Error changing container ownership:', error);
+      setOwnershipChangeStatus('error');
+    } finally {
+      setIsChangingOwnership(false);
+    }
+  };
+
+  const handleOwnershipChange = () => {
+    if (selectedCollaborator) {
+      changeContainerOwnership(selectedCollaborator, selectedCollaboratorLogin);
+    }
+  };
+
+  const handlePopupClose = () => {
+    setShowOwnershipPopup(false);
+    setSelectedCollaborator('');
+    setSelectedCollaboratorLogin('');
+    setOwnershipChangeStatus('idle');
+    // Refresh the page with the same container ID
+    if (confirmedContainerId) {
+      getContainerInfo(confirmedContainerId);
     }
   };
 
@@ -168,6 +232,10 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
               <div className="flex-1">
                 <h3 className="text-base font-semibold text-blue-900 mb-1">Currently Viewing</h3>
                 <div className="flex items-center space-x-2">
+                <span className="text-sm font-medium text-blue-700">Container Name:</span>
+                  <span className="px-2 py-1 bg-blue-100 text-blue-900 font-mono text-sm rounded border border-blue-200">
+                    {confirmedContainerName}
+                  </span>
                   <span className="text-sm font-medium text-blue-700">Container ID:</span>
                   <span className="px-2 py-1 bg-blue-100 text-blue-900 font-mono text-sm rounded border border-blue-200">
                     {confirmedContainerId}
@@ -248,7 +316,10 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
                       {containerInfo.primaryContainerOwner}
                     </span>
                   </div>
-                  <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                  <button 
+                    onClick={() => setShowOwnershipPopup(true)}
+                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
@@ -301,6 +372,107 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
             <p className="mt-1 text-sm text-gray-500">
               Enter a container ID above to view the container's recertification information.
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* Ownership Change Popup */}
+      {showOwnershipPopup && (
+        <div className="fixed inset-0 imp-bg flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">Change Container Ownership</h3>
+              <p className="text-sm text-gray-500 mt-1">Select a new owner from the collaborators list</p>
+            </div>
+            
+            <div className="px-6 py-4">
+              {ownershipChangeStatus === 'idle' && (
+                <>
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Select New Owner
+                    </label>
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {collaborators.map((collaborator, index) => (
+                        <label key={`${collaborator.user_id}-${index}`} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-md hover:bg-gray-50 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="collaborator"
+                            value={collaborator.user_id}
+                            checked={selectedCollaborator === collaborator.user_id}
+                            onChange={(e) => {
+                              setSelectedCollaborator(e.target.value);
+                              setSelectedCollaboratorLogin(collaborator.user_login);
+                            }}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                          />
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-gray-900">
+                              {collaborator.user_login}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              ID: {collaborator.user_id}
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-3 mt-6">
+                    <button
+                      onClick={() => setShowOwnershipPopup(false)}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleOwnershipChange}
+                      disabled={!selectedCollaborator || isChangingOwnership}
+                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                      {isChangingOwnership ? 'Changing...' : 'Submit'}
+                    </button>
+                  </div>
+                </>
+              )}
+              
+              {ownershipChangeStatus === 'success' && (
+                <div className="text-center py-6">
+                  <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                    <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Ownership Change Successful</h3>
+                  <p className="text-sm text-gray-500 mb-6">The container ownership has been updated successfully.</p>
+                  <button
+                    onClick={handlePopupClose}
+                    className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                  >
+                    OK
+                  </button>
+                </div>
+              )}
+              
+              {ownershipChangeStatus === 'error' && (
+                <div className="text-center py-6">
+                  <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                    <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Ownership Change Failed</h3>
+                  <p className="text-sm text-gray-500 mb-6">There was an error updating the container ownership. Please try again.</p>
+                  <button
+                    onClick={handlePopupClose}
+                    className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                  >
+                    OK
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
