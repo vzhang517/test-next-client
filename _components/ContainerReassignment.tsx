@@ -24,6 +24,7 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
   const [confirmedContainerId, setConfirmedContainerId] = useState<string>('');
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [includeEditor, setIncludeEditor] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [containerInfo, setContainerInfo] = useState<ContainerInfo | null>(null);
   const [confirmedContainerName, setConfirmedContainerName] = useState<string>('');
@@ -41,7 +42,8 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
       
       const params = new URLSearchParams({
         containerId: containerId,
-        userId: userId
+        userId: userId,
+        includeEditor: includeEditor.toString()
       });
 
       const response = await fetch(`/api/list-container-ownership?${params.toString()}`, {
@@ -99,7 +101,7 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
         'newOwnerLogin': newOwnerLogin
       };
 
-      const response = await fetch('/api/api/change-container-ownership', {
+      const response = await fetch('/api/change-container-ownership', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -193,28 +195,42 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
           <p className="text-gray-600">Search and view container recertification information for reassignment</p>
         </div>
         
-        <div className="flex flex-col sm:flex-row sm:items-end gap-4 mb-6">
-          <div className="flex-1">
-            <label htmlFor="containerId" className="block text-sm font-medium text-gray-700 mb-2">
-              Container ID
-            </label>
-            <input
-              type="text"
-              id="containerId"
-              value={searchContainerId}
-              onChange={(e) => setSearchContainerId(e.target.value)}
-              placeholder="Enter container ID to search..."
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            />
+        <div className="space-y-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+            <div className="flex-1">
+              <label htmlFor="containerId" className="block text-sm font-medium text-gray-700 mb-2">
+                Container ID
+              </label>
+              <input
+                type="text"
+                id="containerId"
+                value={searchContainerId}
+                onChange={(e) => setSearchContainerId(e.target.value)}
+                placeholder="Enter container ID to search..."
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                onClick={handleSearch}
+                disabled={!searchContainerId || !searchContainerId.trim() || isLoading}
+                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              >
+                {isLoading ? 'Searching...' : 'Search'}
+              </button>
+            </div>
           </div>
-          <div className="flex items-end">
-            <button
-              onClick={handleSearch}
-              disabled={!searchContainerId || !searchContainerId.trim() || isLoading}
-              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-            >
-              {isLoading ? 'Searching...' : 'Search'}
-            </button>
+          <div className="flex items-center">
+            <input
+              id="includeEditors"
+              type="checkbox"
+              checked={includeEditor}
+              onChange={(e) => setIncludeEditor(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="includeEditors" className="ml-2 block text-sm text-gray-700">
+              Include Editors
+            </label>
           </div>
         </div>
 

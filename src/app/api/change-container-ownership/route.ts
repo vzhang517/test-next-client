@@ -8,9 +8,9 @@ export async function POST(request: NextRequest) {
     const newOwnerId = searchParams.get('newOwnerId');
     const newOwnerLogin = searchParams.get('newOwnerLogin');
 
-    if (!containerId) {
+    if (!userId || !containerId || !newOwnerId || !newOwnerLogin) {
       return NextResponse.json(
-        { error: 'container ID is required' },
+        { error: 'Missing required fields: userId, containerId, newOwnerId, newOwnerLogin' },
         { status: 400 }
       );
     }
