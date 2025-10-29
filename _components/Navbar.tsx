@@ -17,8 +17,8 @@ export default function Navbar({ isAdmin, currentSection, userName, onSectionCha
     { key: 'container-recertification-history', label: 'Container Recertification History' },
     { key: 'container-recertification', label: 'Container Recertification' },
     { key: 'container-reassignment', label: 'Container Reassignment' },
+    { key: 'email-templates', label: 'Email Templates' },
      // Add search
-     // Add email templates
     
   ];
 

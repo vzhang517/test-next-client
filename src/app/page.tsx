@@ -23,36 +23,35 @@ function HomeContent() {
       try {
         //Check if there's an existing session that has expired
 
-        const authCode = searchParams.get('auth_code');
+        // const authCode = searchParams.get('auth_code');
         
-        if (!authCode) {
-          setError('No authorization code or logout URL received from Box');
-          setIsLoading(false);
-          return;
-        }
-
-        //fetch user info from Box
-        const userResponse = await fetch('/api/auth/box-auth', {
-          method: 'POST',
-          body: JSON.stringify({auth_code: authCode}),
-        });
-
-        if (!userResponse.ok) {
-          setError('Failed to authenticate with Box');
-          setIsLoading(false);
-          return;
-        }
-
-        const userData = await userResponse.json();
-
-        sessionStorage.setItem('userID', userData.id);
-        sessionStorage.setItem('userName', userData.name);
-
-        // Only access sessionStorage on the client side
-        // if (typeof window !== 'undefined') {
-        //   sessionStorage.setItem('userID', '45341523617');
-        //   sessionStorage.setItem('userName', 'Vincent Zhang');
+        // if (!authCode) {
+        //   setError('No authorization code or logout URL received from Box');
+        //   setIsLoading(false);
+        //   return;
         // }
+
+        // //fetch user info from Box
+        // const userResponse = await fetch('/api/auth/box-auth', {
+        //   method: 'POST',
+        //   body: JSON.stringify({auth_code: authCode}),
+        // });
+
+        // if (!userResponse.ok) {
+        //   setError('Failed to authenticate with Box');
+        //   setIsLoading(false);
+        //   return;
+        // }
+
+        // const userData = await userResponse.json();
+
+        // sessionStorage.setItem('userID', userData.id);
+        // sessionStorage.setItem('userName', userData.name);
+
+
+        sessionStorage.setItem('userID', '45341523617');
+        sessionStorage.setItem('userName', 'Vincent Zhang');
+        
 
         // Set authenticated state to show success message
         setIsAuthenticated(true);
