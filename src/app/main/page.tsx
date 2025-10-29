@@ -9,6 +9,7 @@ import ContainerRecertification from '@/_components/ContainerRecertification';
 import ContainerRecertificationHistory from '@/_components/ContainerRecertificationHistory';
 import ContainerOwnerDashboard from '@/_components/ContainerOwnerDashboard';
 import ContainerReassignment from '@/_components/ContainerReassignment';
+import EmailTemplates from '@/_components/EmailTemplates';
 import Support from '@/_components/Support';
 export default function MainPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -84,16 +85,16 @@ export default function MainPage() {
         }
         return <ContainerReassignment userId={user.id} isAdmin={user.isAdmin}/>;
 
-      // case 'email-templates':
-      //   if (!user.isAdmin) {
-      //     return (
-      //       <div className="bg-white shadow rounded-lg p-6 text-center">
-      //         <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
-      //         <p className="text-gray-600">Admin privileges required to access this section.</p>
-      //       </div>
-      //     );
-      //   }
-      //   return <AdminView userId={user.id} />;
+      case 'email-templates':
+        if (!user.isAdmin) {
+          return (
+            <div className="bg-white shadow rounded-lg p-6 text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
+              <p className="text-gray-600">Admin privileges required to access this section.</p>
+            </div>
+          );
+        }
+        return <EmailTemplates userId={user.id} isAdmin={user.isAdmin} />;
       
       case 'container-recertification':
         return <ContainerRecertification userId={user.id} isAdmin={user.isAdmin} />;
