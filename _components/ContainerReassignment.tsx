@@ -94,6 +94,11 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
       setIsChangingOwnership(true);
       setOwnershipChangeStatus('idle');
 
+      console.log('newOwnerId:', newOwnerId);
+      console.log('newOwnerLogin:', newOwnerLogin);
+      console.log('confirmedContainerId:', confirmedContainerId);
+      console.log('userId:', userId);
+
       const updateData = {
         'user-id': parseInt(userId),
         'container-id': parseInt(confirmedContainerId),

@@ -2,13 +2,18 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-    const containerId = searchParams.get('containerId');
-    const newOwnerId = searchParams.get('newOwnerId');
-    const newOwnerLogin = searchParams.get('newOwnerLogin');
+
+    const body = await request.json();
+    console.log('body:', body);
+    const { 'user-id': userId, 'container-id': containerId, newOwnerId, newOwnerLogin } = body;
+
 
     if (!userId || !containerId || !newOwnerId || !newOwnerLogin) {
+      console.log('Missing required fields: userId, containerId, newOwnerId, newOwnerLogin');
+      console.log('userId:', userId);
+      console.log('containerId:', containerId);
+      console.log('newOwnerId:', newOwnerId);
+      console.log('newOwnerLogin:', newOwnerLogin);
       return NextResponse.json(
         { error: 'Missing required fields: userId, containerId, newOwnerId, newOwnerLogin' },
         { status: 400 }
@@ -32,6 +37,9 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(updateData),
     });
 
+    console.log('updateResponse:');
+    console.log(updateResponse);
+
 
     if (!updateResponse.ok) {
       throw new Error(`HTTP error! status: ${updateResponse.status}`);
@@ -46,9 +54,9 @@ export async function POST(request: NextRequest) {
     },
     });
   } catch (error) {
-    console.error('Error fetching container owner dashboard from api:', error);
+    console.error('Error changing container ownership in api:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch container owner dashboard data' },
+      { error: 'Failed to change container ownership' },
       { status: 500 }
     );
   }
