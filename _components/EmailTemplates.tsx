@@ -185,13 +185,16 @@ export default function EmailTemplates({ userId, isAdmin }: EmailTemplatesProps)
       setError(null);
 
       const updateData = {
-        'template-id': templateDetails?.id?.toString() || '',
+        'templateId': templateDetails?.id?.toString() || '',
         'name': formData.name,
         'description': formData.description,
         'subject': formData.subject,
-        'body': formData.body,
-        'box-file-id': formData.box_file_id,
+        'emailBody': formData.body,
+        'boxFileId': formData.box_file_id,
       };
+
+      console.log('updateData:');
+      console.log(updateData);
 
       const response = await fetch('/api/email-template-edit', {
         method: 'POST',

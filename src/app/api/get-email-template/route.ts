@@ -5,6 +5,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const templateId = searchParams.get('templateId');
     const userId = searchParams.get('userId');
+    
     if (!templateId || !userId) {
       return NextResponse.json(
         { error: 'Template ID and User ID are required' },

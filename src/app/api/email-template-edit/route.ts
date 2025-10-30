@@ -5,7 +5,14 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     console.log('body:', body);
-    const { 'template-id': templateId, name, description, subject, 'body': emailBody, boxFileId } = body;
+    const { templateId, name, description, subject, emailBody, boxFileId } = body;
+
+    console.log('templateId:', templateId);
+    console.log('name:', name);
+    console.log('description:', description);
+    console.log('subject:', subject);
+    console.log('emailBody:', emailBody);
+    console.log('boxFileId:', boxFileId);
 
 
     if (!templateId || templateId === '') {
@@ -19,10 +26,13 @@ export async function POST(request: NextRequest) {
       'template-id': templateId || '',
       'template-name': name || '',
       'template-desc': description || '',
-      'subject': subject || '',
-      'subject-line': emailBody || '',
+      'subject-line': subject || '',
+      'email-body': emailBody || '',
       'box-file-id': boxFileId || '',
     };
+
+    console.log('updateData:');
+    console.log(updateData);
 
 
     const updateResponse = await fetch('https://nav.ossoccer.com/email_template_edit/', {
