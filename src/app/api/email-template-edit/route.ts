@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     console.log('body:', body);
-    const { templateId, name, description, subject, emailBody, boxFileId } = body;
+    const { userId, templateId, name, description, subject, emailBody, boxFileId } = body;
 
     console.log('templateId:', templateId);
     console.log('name:', name);
@@ -15,14 +15,15 @@ export async function POST(request: NextRequest) {
     console.log('boxFileId:', boxFileId);
 
 
-    if (!templateId || templateId === '') {
+    if (!userId || !templateId || templateId === '') {
         return NextResponse.json(
-          { error: 'Email Template is required' },
+          { error: 'User ID and Email Template are required' },
           { status: 400 }
         );
     }
 
     const updateData = {
+      'user-id': userId || '',
       'template-id': templateId || '',
       'template-name': name || '',
       'template-desc': description || '',
