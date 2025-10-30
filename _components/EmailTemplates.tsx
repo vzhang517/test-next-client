@@ -178,7 +178,7 @@ export default function EmailTemplates({ userId, isAdmin }: EmailTemplatesProps)
 
     fetchTemplates();
   };
-  
+
 
   const handleUpdate = async () => {
     try {
@@ -186,6 +186,7 @@ export default function EmailTemplates({ userId, isAdmin }: EmailTemplatesProps)
       setError(null);
 
       const updateData = {
+        'userId': userId,
         'templateId': templateDetails?.id?.toString() || '',
         'name': formData.name,
         'description': formData.description,

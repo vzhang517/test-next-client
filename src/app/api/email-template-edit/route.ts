@@ -7,6 +7,7 @@ export async function POST(request: NextRequest) {
     console.log('body:', body);
     const { userId, templateId, name, description, subject, emailBody, boxFileId } = body;
 
+    console.log('userId:', userId);
     console.log('templateId:', templateId);
     console.log('name:', name);
     console.log('description:', description);
