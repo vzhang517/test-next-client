@@ -17,11 +17,9 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
     const data = await response.json();
+
+    console.log('list email templates API route data:', data);
 
     return NextResponse.json(data, {
       status: 200,

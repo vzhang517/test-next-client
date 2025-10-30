@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('user');
+    const userId = searchParams.get('userId');
     const column = searchParams.get('column');
     const order = searchParams.get('order');
 
@@ -38,6 +38,8 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
+
+    console.log('container owner dashboard API route data:', data);
 
     return NextResponse.json(data, {
       status: 200,

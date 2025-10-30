@@ -3,18 +3,20 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const templateId = searchParams.get('templateId');
     const userId = searchParams.get('userId');
-    if (!templateId || !userId) {
+    const containerId = searchParams.get('containerId');
+
+
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Template ID and User ID are required' },
+        { error: 'User ID is required' },
         { status: 400 }
       );
     }
 
-    
-    let apiUrl = `https://nav.ossoccer.com/get_email_template/${templateId}/?user-id=${userId}`;
-    
+    // Build the API URL with sorting parameters
+    let apiUrl = `https://nav.ossoccer.com/container_unlock/?user-id=${userId}&container-id=${containerId}`;
+
 
     console.log('apiUrl:', apiUrl);
 
@@ -38,9 +40,9 @@ export async function GET(request: NextRequest) {
     },
     });
   } catch (error) {
-    console.error('Error fetching email template from api:', error);
+    console.error('Error unlocking container in api:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch email template' },
+      { error: 'Failed to unlock container' },
       { status: 500 }
     );
   }

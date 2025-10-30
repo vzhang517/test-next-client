@@ -8,8 +8,8 @@ interface EmailTemplatesProps {
 }
 
 interface EmailTemplateList {
-  template_name: string;
-  template_id: string;
+  id: string;
+  name: string;
 }
 
 interface EmailTemplateDetails {
@@ -24,12 +24,13 @@ interface EmailTemplateDetails {
 
 export default function EmailTemplates({ userId, isAdmin }: EmailTemplatesProps) {
   const [templates, setTemplates] = useState<EmailTemplateList[]>([]);
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('new');
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [templateDetails, setTemplateDetails] = useState<EmailTemplateDetails | null>(null);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState<boolean>(false);
   const [isLoadingDetails, setIsLoadingDetails] = useState<boolean>(false);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccessPopup, setShowSuccessPopup] = useState<boolean>(false);
 
   // Form fields state
   const [formData, setFormData] = useState({
@@ -58,6 +59,8 @@ export default function EmailTemplates({ userId, isAdmin }: EmailTemplatesProps)
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
+        console.log('response:', response);
+
         const data = await response.json();
         setTemplates(data || []);
         setIsLoadingTemplates(false);
@@ -73,7 +76,7 @@ export default function EmailTemplates({ userId, isAdmin }: EmailTemplatesProps)
 
   // Fetch template details when a template is selected
   useEffect(() => {
-    if (selectedTemplateId === 'new') {
+    if (!selectedTemplateId || selectedTemplateId === '') {
       setTemplateDetails(null);
       setFormData({
         name: '',
@@ -90,7 +93,12 @@ export default function EmailTemplates({ userId, isAdmin }: EmailTemplatesProps)
         setIsLoadingDetails(true);
         setError(null);
 
-        const response = await fetch(`/api/get-email-template?templateId=${selectedTemplateId}`, {
+        const params = new URLSearchParams({
+          templateId: selectedTemplateId,
+          userId: userId
+        });
+
+        const response = await fetch(`/api/get-email-template?${params.toString()}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -128,13 +136,56 @@ export default function EmailTemplates({ userId, isAdmin }: EmailTemplatesProps)
     }));
   };
 
+  const handleSuccessOk = () => {
+    setShowSuccessPopup(false);
+    // Refresh the component by refetching templates and clearing selection
+    setSelectedTemplateId('');
+    setTemplateDetails(null);
+    setFormData({
+      name: '',
+      description: '',
+      subject: '',
+      body: '',
+      box_file_id: '',
+    });
+    
+    // Refetch templates
+    const fetchTemplates = async () => {
+      try {
+        setIsLoadingTemplates(true);
+        setError(null);
+
+        const response = await fetch('/api/list-email-templates', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setTemplates(data || []);
+        setIsLoadingTemplates(false);
+      } catch (error) {
+        console.error('Error fetching email templates:', error);
+        setError(error instanceof Error ? error.message : 'Failed to fetch email templates');
+        setIsLoadingTemplates(false);
+      }
+    };
+
+    fetchTemplates();
+  };
+
   const handleUpdate = async () => {
     try {
       setIsUpdating(true);
       setError(null);
 
       const updateData = {
-        'template-id': selectedTemplateId === 'new' ? '' : templateDetails?.id?.toString() || '',
+        'template-id': templateDetails?.id?.toString() || '',
         'name': formData.name,
         'description': formData.description,
         'subject': formData.subject,
@@ -157,8 +208,8 @@ export default function EmailTemplates({ userId, isAdmin }: EmailTemplatesProps)
       const data = await response.json();
       console.log('Template updated successfully:', data);
       
-      // Optionally refresh templates list or show success message
       setIsUpdating(false);
+      setShowSuccessPopup(true);
     } catch (error) {
       console.error('Error updating email template:', error);
       setError(error instanceof Error ? error.message : 'Failed to update email template');
@@ -203,17 +254,17 @@ export default function EmailTemplates({ userId, isAdmin }: EmailTemplatesProps)
               className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               disabled={isLoadingTemplates}
             >
-              <option value="new">New Template</option>
+              <option value="">-- Select a template --</option>
               {templates.map((template) => (
-                <option key={template.template_id} value={template.template_id}>
-                  {template.template_name}
+                <option key={template.id} value={template.id}>
+                  {template.name}
                 </option>
               ))}
             </select>
           </div>
 
           {/* Loading State for Template Details */}
-          {isLoadingDetails && selectedTemplateId !== 'new' && (
+          {isLoadingDetails && selectedTemplateId && selectedTemplateId !== '' && (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
               <p className="mt-2 text-sm text-gray-600">Loading template details...</p>
@@ -221,19 +272,8 @@ export default function EmailTemplates({ userId, isAdmin }: EmailTemplatesProps)
           )}
 
           {/* Template Details Form */}
-          {!isLoadingDetails && (selectedTemplateId === 'new' || templateDetails) && (
+          {!isLoadingDetails && templateDetails && (
             <div className="space-y-4">
-              {/* ID Field (non-editable, only shown if not new) */}
-              {selectedTemplateId !== 'new' && templateDetails && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    ID
-                  </label>
-                  <div className="mt-1 p-3 bg-gray-50 border border-gray-200 rounded-md">
-                    <span className="text-sm text-gray-900">{templateDetails.id}</span>
-                  </div>
-                </div>
-              )}
 
               {/* Name Field */}
               <div>
@@ -265,17 +305,15 @@ export default function EmailTemplates({ userId, isAdmin }: EmailTemplatesProps)
                 />
               </div>
 
-              {/* Status Field (non-editable, only shown if not new) */}
-              {selectedTemplateId !== 'new' && templateDetails && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
-                  </label>
-                  <div className="mt-1 p-3 bg-gray-50 border border-gray-200 rounded-md">
-                    <span className="text-sm text-gray-900">{templateDetails.status}</span>
-                  </div>
+              {/* Status Field (non-editable) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Status
+                </label>
+                <div className="mt-1 p-3 bg-gray-50 border border-gray-200 rounded-md">
+                  <span className="text-sm text-gray-900">{templateDetails.status}</span>
                 </div>
-              )}
+              </div>
 
               {/* Subject Field */}
               <div>
@@ -336,6 +374,35 @@ export default function EmailTemplates({ userId, isAdmin }: EmailTemplatesProps)
           )}
         </div>
       </div>
+
+      {/* Success Popup */}
+      {showSuccessPopup && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3 text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mt-4">Success</h3>
+              <div className="mt-2 px-7 py-3">
+                <p className="text-sm text-gray-500">
+                  Email template has been updated successfully.
+                </p>
+              </div>
+              <div className="items-center px-4 py-3">
+                <button
+                  onClick={handleSuccessOk}
+                  className="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

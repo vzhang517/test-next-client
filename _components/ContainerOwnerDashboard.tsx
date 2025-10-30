@@ -40,7 +40,7 @@ export default function ContainerOwnerDashboard({ userId }: ContainerOwnerDashbo
         
         // Build query parameters
         const params = new URLSearchParams({
-          user: userId
+          userId: userId
         });
         
         if (sortColumn) {
@@ -313,11 +313,11 @@ export default function ContainerOwnerDashboard({ userId }: ContainerOwnerDashbo
                 <tr 
                   key={container.container_folder_id} 
                   className={`transition-colors duration-150 ${
-                    container.status === 'Recertified' 
-                      ? 'cursor-default' 
-                      : 'hover:bg-gray-50 cursor-pointer'
+                    container.status === 'Incomplete' 
+                      ? 'hover:bg-gray-50 cursor-pointer' 
+                      : 'cursor-default'
                   }`}
-                  onClick={container.status === 'Recertified' ? undefined : () => handleRowClick(container.container_folder_id, container.id)}
+                  onClick={container.status === 'Incomplete' ? () => handleRowClick(container.container_folder_id, container.id) : undefined}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     <div className="flex items-center space-x-2">

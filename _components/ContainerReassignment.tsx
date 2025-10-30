@@ -34,6 +34,7 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
   const [selectedCollaboratorLogin, setSelectedCollaboratorLogin] = useState<string>('');
   const [ownershipChangeStatus, setOwnershipChangeStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [isChangingOwnership, setIsChangingOwnership] = useState<boolean>(false);
+  const [isUnlocking, setIsUnlocking] = useState<boolean>(false);
 
   const getContainerInfo = async (containerId: string) => {
     try {
@@ -86,6 +87,38 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
     if (searchContainerId && searchContainerId.trim()) {
       setHasSearched(true);
       getContainerInfo(searchContainerId.trim());
+    }
+  };
+
+  const unlockContainer = async () => {
+    try {
+      setIsUnlocking(true);
+
+      const params = new URLSearchParams({
+        userId: userId,
+        containerId: confirmedContainerId
+      });
+
+      const response = await fetch(`/api/container-unlock?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Refresh the component with the same container ID
+      if (confirmedContainerId) {
+        await getContainerInfo(confirmedContainerId);
+      }
+    } catch (error) {
+      console.error('Error unlocking container:', error);
+      setError(error instanceof Error ? error.message : 'Failed to unlock container');
+    } finally {
+      setIsUnlocking(false);
     }
   };
 
@@ -292,10 +325,25 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
                       {containerInfo.containerRecertificationId}
                     </span>
                   </div>
-                  {containerInfo.status === 'Overdue' && (
-                    <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                  {containerInfo.status === 'Overdue' ? (
+                    <button 
+                      onClick={unlockContainer}
+                      disabled={isUnlocking}
+                      className="p-2 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Unlock container"
+                    >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                    </button>
+                  ) : (
+                    <button 
+                      disabled
+                      className="p-2 text-gray-300 cursor-not-allowed"
+                      title="Container unlocked"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
                       </svg>
                     </button>
                   )}

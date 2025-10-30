@@ -8,21 +8,19 @@ export async function POST(request: NextRequest) {
     const { 'template-id': templateId, name, description, subject, 'body': emailBody, boxFileId } = body;
 
 
-    if (!templateId ) {
-      if (!name || !description || !subject || !emailBody || !boxFileId) {
+    if (!templateId || templateId === '') {
         return NextResponse.json(
-          { error: 'New Template, template name, description, subject, body, and box file ID are required' },
+          { error: 'Email Template is required' },
           { status: 400 }
         );
-      }
     }
 
     const updateData = {
       'template-id': templateId || '',
-      'name': name || '',
-      'description': description || '',
+      'template-name': name || '',
+      'template-desc': description || '',
       'subject': subject || '',
-      'body': emailBody || '',
+      'subject-line': emailBody || '',
       'box-file-id': boxFileId || '',
     };
 
