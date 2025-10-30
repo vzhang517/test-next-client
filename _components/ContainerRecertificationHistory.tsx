@@ -28,7 +28,7 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
   const [searchContainerId, setSearchContainerId] = useState<string>('');
   const [confirmedContainerId, setConfirmedContainerId] = useState<string>('');
   const [hasSearched, setHasSearched] = useState<boolean>(false);
-  const { selectedContainerId, setSelectedContainerId } = useNavigation();
+  const {selectedContainerId, setSelectedContainerId } = useNavigation();
   const [historyEntries, setHistoryEntries] = useState<RecertificationHistoryEntry[]>([]);
 
   // Auto-search when a container ID is selected from the dashboard
@@ -127,7 +127,7 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
       
       const params = new URLSearchParams({
         containerId: confirmedContainerId,
-        user: userId,
+        userId: userId,
         isAdmin: isAdmin.toString(),
         export: 'true'
       });

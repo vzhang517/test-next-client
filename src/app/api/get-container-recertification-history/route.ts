@@ -8,6 +8,12 @@ export async function GET(request: NextRequest) {
     const isAdmin = searchParams.get('isAdmin');
     const exportParam = searchParams.get('export');
 
+    console.log('userId:', userId);
+    console.log('containerId:', containerId);
+    console.log('isAdmin:', isAdmin);
+    console.log('exportParam:', exportParam);
+
+
     if (!userId || !containerId || !isAdmin) {
       return NextResponse.json(
         { error: 'missing required parameter' },
@@ -16,10 +22,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Build the API URL with parameters
-    let apiUrl = `https://nav.ossoccer.com/get_container_recertification_history/?container-id=${containerId}&user-id=${userId}&is-admin=${isAdmin}}`;
+    let apiUrl = `https://nav.ossoccer.com/get_container_recertification_history/?container-id=${containerId}&user-id=${userId}&is-admin=${isAdmin}`;
   
     // Add export parameter if present
-    if (exportParam === 'true') {
+    if (exportParam == 'true') {
       apiUrl += '&export=true';
     }
 
