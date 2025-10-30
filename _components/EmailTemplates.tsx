@@ -178,6 +178,7 @@ export default function EmailTemplates({ userId, isAdmin }: EmailTemplatesProps)
 
     fetchTemplates();
   };
+  
 
   const handleUpdate = async () => {
     try {
