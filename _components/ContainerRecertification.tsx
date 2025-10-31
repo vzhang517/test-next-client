@@ -28,7 +28,8 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
   const [searchContainerId, setSearchContainerId] = useState<string>('');
   const [confirmedContainerName, setConfirmedContainerName] = useState<string>('');
   const [confirmedContainerId, setConfirmedContainerId] = useState<string>('');
-  const [recertificationId, setRecertificationId] = useState<string>('');
+  const [confirmedRecertificationId, setConfirmedRecertificationId] = useState<string>('');
+  const [confirmedRecertificationStatus, setConfirmedRecertificationStatus] = useState<string>('');
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [isCertified, setIsCertified] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -46,7 +47,7 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
       const containerIdString = String(selectedContainerId);
       const recertificationIdString = String(selectedRecertificationId);
       setSearchContainerId(containerIdString);
-      setRecertificationId(recertificationIdString);
+      setConfirmedRecertificationId(recertificationIdString);
       setHasSearched(true);
       getContainerCollaborations(containerIdString);
       // Clear the selected container ID after using it
@@ -59,15 +60,15 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
     try {
       setError(null);
       setIsLoading(true);
-      
+
       const params = new URLSearchParams({
         containerId: containerId,
         userId: userId
       });
 
       // Add recertificationId as optional parameter if it exists
-      if (recertificationId && recertificationId.trim()) {
-        params.append('recertificationId', recertificationId.trim());
+      if (confirmedRecertificationId && confirmedRecertificationId.trim()) {
+        params.append('recertificationId', confirmedRecertificationId.trim());
       }
 
       const response = await fetch(`/api/get-container-recertification-collaborations?${params.toString()}`, {
@@ -83,7 +84,7 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
 
       const data = await response.json();
       console.log('Container collaborations data:', data);
-      
+
       // Transform the API data to match our interface
       const transformedData: CollaborationRecord[] = data.collaborations.map((item: any) => ({
         id: item.id?.toString() || '',
@@ -96,6 +97,8 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
       }));
 
       setConfirmedContainerName(data.container.folder_name)
+      setConfirmedRecertificationId(data.container.recertification_id);
+      setConfirmedRecertificationStatus(data.container.recertification_status);
       setCollaborations(transformedData);
       setConfirmedContainerId(containerId); // Only update confirmed container ID after successful response
       setIsLoading(false);
@@ -118,7 +121,7 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
   const handleSubmit = async () => {
     // Check if either certification is checked OR at least one collaboration is selected
     const selectedCollaborations = collaborations.filter(collab => collab.isSelected);
-    
+
     if (!isCertified && selectedCollaborations.length === 0) {
       alert('Please either certify this container or select at least one collaboration to update.');
       return;
@@ -132,46 +135,65 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
     setIsSubmitting(true);
 
     try {
-      // Compile the data structure
-      const updateData = {
-        'user-id': parseInt(userId),
-        'container-id': parseInt(confirmedContainerId),
-        'recertification-id': parseInt(recertificationId),
-        'collaborations': selectedCollaborations.map(collab => [
-          collab.collaborationId,
-          collab.permissionLevel
-        ])
-      };
+      // Always update collaborations if any are selected
+      if (selectedCollaborations.length > 0) {
+        const updateCollaborationsData = {
+          'userId': parseInt(userId),
+          'containerId': parseInt(confirmedContainerId),
+          'recertificationId': parseInt(confirmedRecertificationId),
+          'collaborations': selectedCollaborations.map(collab => [
+            collab.collaborationId,
+            collab.permissionLevel
+          ])
+        };
 
-      const response = await fetch('/api/update-container-recertification-collaborations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updateData),
-      });
+        const collaborationsResponse = await fetch('/api/update-container-collaborations', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateCollaborationsData),
+        });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      
-      if (result.success) {
-        // Check if this was a collaboration-only submission (no certification)
-        if (!isCertified && selectedCollaborations.length > 0) {
-          // Show popup with number of collaborations updated
-          setUpdatedCollaborationsCount(selectedCollaborations.length);
-          setShowSuccessPopup(true);
-        } else {
-          // Navigate to RecertificationComplete component for certified submissions
-          router.push('/recertification-complete');
+        if (!collaborationsResponse.ok) {
+          throw new Error(`HTTP error! status: ${collaborationsResponse.status}`);
         }
-      } else {
-        throw new Error(result.error || 'Failed to update collaborations');
+
       }
 
-    } catch (error) {
+      // If certified, also call the recertification route
+      if (isCertified) {
+        const updateRecertificationData = {
+          'userId': parseInt(userId),
+          'containerId': parseInt(confirmedContainerId),
+          'recertificationId': parseInt(confirmedRecertificationId)
+        };
+
+        const recertificationResponse = await fetch('/api/update-container-recertification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updateRecertificationData),
+        });
+
+        if (!recertificationResponse.ok) {
+          throw new Error(`HTTP error! status: ${recertificationResponse.status}`);
+        }
+
+      }
+
+      // Check if this was a collaboration-only submission (no certification)
+      if (!isCertified && selectedCollaborations.length > 0) {
+        // Show popup with number of collaborations updated
+        setUpdatedCollaborationsCount(selectedCollaborations.length);
+        setShowSuccessPopup(true);
+      } else {
+        // Navigate to RecertificationComplete component for certified submissions
+        router.push('/recertification-complete');
+      }
+    }
+    catch (error) {
       console.error('Error submitting recertification:', error);
       alert('Failed to submit recertification. Please try again.');
     } finally {
@@ -181,7 +203,7 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
 
   const mapPermissionLevel = (permission: string): 'co-owner' | 'editor' | 'viewer' | 'previewer' | 'uploader' | 'previewer_uploader' | 'viewer_uploader' | 'delete' => {
     const lowerPermission = permission?.toLowerCase() || '';
-    
+
     if (lowerPermission.includes('owner') || lowerPermission.includes('admin')) {
       return 'co-owner';
     } else if (lowerPermission.includes('edit') || lowerPermission.includes('write')) {
@@ -204,9 +226,9 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
   };
 
   const handlePermissionChange = (id: string, newPermission: 'co-owner' | 'editor' | 'viewer' | 'previewer' | 'uploader' | 'previewer_uploader' | 'viewer_uploader' | 'delete') => {
-    setCollaborations(prev => 
-      prev.map(collab => 
-        collab.id === id 
+    setCollaborations(prev =>
+      prev.map(collab =>
+        collab.id === id
           ? { ...collab, permissionLevel: newPermission }
           : collab
       )
@@ -214,9 +236,9 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
   };
 
   const handleCheckboxChange = (id: string) => {
-    setCollaborations(prev => 
-      prev.map(collab => 
-        collab.id === id 
+    setCollaborations(prev =>
+      prev.map(collab =>
+        collab.id === id
           ? { ...collab, isSelected: !collab.isSelected }
           : collab
       )
@@ -232,8 +254,8 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
   };
 
   const getCollaboratorTypeColor = (type: string) => {
-    return type === 'Managed' 
-      ? 'bg-blue-100 text-blue-800' 
+    return type === 'Managed'
+      ? 'bg-blue-100 text-blue-800'
       : 'bg-yellow-100 text-yellow-800';
   };
 
@@ -285,8 +307,24 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Container Recertification</h1>
           <p className="text-gray-600">Manage collaboration access and permissions</p>
+          {confirmedRecertificationStatus && confirmedRecertificationStatus !== 'Incomplete' && (
+            <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">
+                    Container may have been recertified recently and cannot be recertified again, please contact your admin
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        
+
         <div className="flex flex-col sm:flex-row sm:items-end gap-4 mb-6">
           <div className="flex-1">
             <label htmlFor="containerId" className="block text-sm font-medium text-gray-700 mb-2">
@@ -326,7 +364,7 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
               <div className="flex-1">
                 <h3 className="text-base font-semibold text-blue-900 mb-1">Currently Recertifying</h3>
                 <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-blue-700">Container Name:</span>
+                  <span className="text-sm font-medium text-blue-700">Container Name:</span>
                   <span className="px-2 py-1 bg-blue-100 text-blue-900 font-mono text-sm rounded border border-blue-200">
                     {confirmedContainerName}
                   </span>
@@ -498,9 +536,9 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
               </label>
             </div>
             <div className="flex space-x-4">
-              <button 
+              <button
                 onClick={handleSubmit}
-                disabled={(!isCertified && collaborations.filter(collab => collab.isSelected).length === 0) || isSubmitting}
+                disabled={(!isCertified && collaborations.filter(collab => collab.isSelected).length === 0) || isSubmitting || (confirmedRecertificationStatus !== '' && confirmedRecertificationStatus !== 'Incomplete')}
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit'}

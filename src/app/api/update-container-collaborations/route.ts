@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { 'user-id': userId, 'container-id': containerId, collaborations } = body;
+    const { userId, containerId, recertificationId, collaborations } = body;
 
-    if (!userId || !containerId || !collaborations) {
+    if (!userId || !containerId || !recertificationId || !collaborations) {
       return NextResponse.json(
-        { error: 'Missing required fields: user-id, container-id, and collaborations' },
+        { error: 'Missing required fields: user-id, container-id, recertification-id, and collaborations' },
         { status: 400 }
       );
     }
@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
     const updateData = {
       'user-id': userId,
       'container-id': containerId,
+      'recertification-id': recertificationId,
       'collaborations': collaborations
     };
 

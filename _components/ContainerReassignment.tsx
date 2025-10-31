@@ -519,7 +519,7 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
                     onClick={handlePopupClose}
                     className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
                   >
-                    OK
+                    Ok
                   </button>
                 </div>
               )}
@@ -537,7 +537,7 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
                     onClick={handlePopupClose}
                     className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                   >
-                    OK
+                    Ok
                   </button>
                 </div>
               )}
