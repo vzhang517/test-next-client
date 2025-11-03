@@ -11,6 +11,7 @@ import ContainerOwnerDashboard from '@/_components/ContainerOwnerDashboard';
 import ContainerReassignment from '@/_components/ContainerReassignment';
 import EmailTemplates from '@/_components/EmailTemplates';
 import Support from '@/_components/Support';
+import Search from '@/_components/Search';
 export default function MainPage() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -63,16 +64,6 @@ export default function MainPage() {
     if (!user) return null;
 
     switch (currentSection) {
-      // case 'search':
-      //   if (!user.isAdmin) {
-      //     return (
-      //       <div className="bg-white shadow rounded-lg p-6 text-center">
-      //         <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
-      //         <p className="text-gray-600">Admin privileges required to access this section.</p>
-      //       </div>
-      //     );
-      //   }
-      //   return <AdminView userId={user.id} />;
       
       case 'container-reassignment':
         if (!user.isAdmin) {
@@ -95,6 +86,17 @@ export default function MainPage() {
           );
         }
         return <EmailTemplates userId={user.id} isAdmin={user.isAdmin} />;
+
+      case 'search':
+        if (!user.isAdmin) {
+          return (
+            <div className="bg-white shadow rounded-lg p-6 text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
+              <p className="text-gray-600">Admin privileges required to access this section.</p>
+            </div>
+          );
+        }
+        return <Search userId={user.id} isAdmin={user.isAdmin} />;
       
       case 'container-recertification':
         return <ContainerRecertification userId={user.id} isAdmin={user.isAdmin} />;
