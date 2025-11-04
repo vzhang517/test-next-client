@@ -13,7 +13,7 @@ interface CollaborationRecord {
   id: string;
   collaborator: string;
   collaboratorType: 'Managed' | 'External';
-  permissionLevel: 'co-owner' | 'editor' | 'viewer' | 'previewer' | 'uploader' | 'previewer_uploader' | 'viewer_uploader' | 'delete';
+  permissionLevel: 'Co-Owner' | 'Editor' | 'Viewer' | 'Previewer' | 'Uploader' | 'Previewer/Uploader' | 'Viewer/Uploader' | 'Delete';
   collaborationId: string;
   invitedDate: string;
   path: string;
@@ -46,8 +46,14 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
       console.log('selectedContainerId:', selectedContainerId);
       const containerIdString = String(selectedContainerId);
       const recertificationIdString = String(selectedRecertificationId);
+      console.log('ContainerIdString:', containerIdString);
+      console.log('SearchContainerId before set:', searchContainerId);
       setSearchContainerId(containerIdString);
+      console.log('SearchContainerId after set:', searchContainerId);
+      console.log('recertificationIdString:', recertificationIdString);
+      console.log('confirmedRecertificationId before set:', confirmedRecertificationId);
       setConfirmedRecertificationId(recertificationIdString);
+      console.log('confirmedRecertificationId after set:', confirmedRecertificationId);
       setHasSearched(true);
       getContainerCollaborations(containerIdString);
       // Clear the selected container ID after using it
@@ -55,6 +61,28 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
       setSelectedRecertificationId(null);
     }
   }, [selectedContainerId, selectedRecertificationId, setSelectedContainerId, setSelectedRecertificationId]);
+
+  // Clear all states when component unmounts (e.g., when navigating away via navbar)
+  // useEffect(() => {
+  //   return () => {
+  //     // Cleanup function runs when component unmounts
+  //     setCollaborations([]);
+  //     setIsLoading(false);
+  //     setError(null);
+  //     setSearchContainerId('');
+  //     setConfirmedContainerName('');
+  //     setConfirmedContainerId('');
+  //     setConfirmedRecertificationId('');
+  //     setConfirmedRecertificationStatus('');
+  //     setHasSearched(false);
+  //     setIsCertified(false);
+  //     setIsSubmitting(false);
+  //     setShowSuccessPopup(false);
+  //     setUpdatedCollaborationsCount(0);
+  //     setSelectedContainerId(null);
+  //     setSelectedRecertificationId(null);
+  //   };
+  // }, [setSelectedContainerId, setSelectedRecertificationId]);
 
   const getContainerCollaborations = async (containerId: string) => {
     try {
@@ -67,8 +95,8 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
       });
 
       // Add recertificationId as optional parameter if it exists
-      if (confirmedRecertificationId && confirmedRecertificationId.trim()) {
-        params.append('recertificationId', confirmedRecertificationId.trim());
+      if (confirmedRecertificationId) {
+        params.append('recertificationId', confirmedRecertificationId);
       }
 
       const response = await fetch(`/api/get-container-recertification-collaborations?${params.toString()}`, {
@@ -97,8 +125,8 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
       }));
 
       setConfirmedContainerName(data.container.folder_name)
-      setConfirmedRecertificationId(data.container.recertification_id);
-      setConfirmedRecertificationStatus(data.container.recertification_status);
+      setConfirmedRecertificationId(data.recertification_id);
+      setConfirmedRecertificationStatus(data.recertification_status);
       setCollaborations(transformedData);
       setConfirmedContainerId(containerId); // Only update confirmed container ID after successful response
       setIsLoading(false);
@@ -186,9 +214,15 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
       // Check if this was a collaboration-only submission (no certification)
       if (!isCertified && selectedCollaborations.length > 0) {
         // Show popup with number of collaborations updated
+        setConfirmedContainerName('');
+        setConfirmedRecertificationStatus('');
         setUpdatedCollaborationsCount(selectedCollaborations.length);
         setShowSuccessPopup(true);
       } else {
+        setConfirmedContainerName('');
+        setConfirmedContainerId('');
+        setConfirmedRecertificationId('');
+        setConfirmedRecertificationStatus('');
         // Navigate to RecertificationComplete component for certified submissions
         router.push('/recertification-complete');
       }
@@ -201,31 +235,30 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
     }
   };
 
-  const mapPermissionLevel = (permission: string): 'co-owner' | 'editor' | 'viewer' | 'previewer' | 'uploader' | 'previewer_uploader' | 'viewer_uploader' | 'delete' => {
-    const lowerPermission = permission?.toLowerCase() || '';
+  const mapPermissionLevel = (permission: string): 'Co-Owner' | 'Editor' | 'Viewer' | 'Previewer' | 'Uploader' | 'Previewer/Uploader' | 'Viewer/Uploader' | 'Delete' => {
 
-    if (lowerPermission.includes('owner') || lowerPermission.includes('admin')) {
-      return 'co-owner';
-    } else if (lowerPermission.includes('edit') || lowerPermission.includes('write')) {
-      return 'editor';
-    } else if (lowerPermission.includes('view') && lowerPermission.includes('upload')) {
-      return 'viewer_uploader';
-    } else if (lowerPermission.includes('preview') && lowerPermission.includes('upload')) {
-      return 'previewer_uploader';
-    } else if (lowerPermission.includes('view') || lowerPermission.includes('read')) {
-      return 'viewer';
-    } else if (lowerPermission.includes('preview')) {
-      return 'previewer';
-    } else if (lowerPermission.includes('upload')) {
-      return 'uploader';
-    } else if (lowerPermission.includes('delete')) {
-      return 'delete';
+    if (permission == 'Co-Owner') {
+      return 'Co-Owner';
+    } else if (permission == 'Editor') {
+      return 'Editor';
+    } else if (permission == 'Viewer/Uploader') {
+      return 'Viewer/Uploader';
+    } else if (permission == 'Previewer/Uploader') {
+      return 'Previewer/Uploader';
+    } else if (permission == 'Viewer') {
+      return 'Viewer';
+    } else if (permission == 'Previewer') {
+      return 'Previewer';
+    } else if (permission == 'Uploader') {
+      return 'Uploader';
+    } else if (permission == 'Delete') {
+      return 'Delete';
     } else {
-      return 'viewer'; // Default fallback
+      return 'Viewer'; // Default fallback
     }
   };
 
-  const handlePermissionChange = (id: string, newPermission: 'co-owner' | 'editor' | 'viewer' | 'previewer' | 'uploader' | 'previewer_uploader' | 'viewer_uploader' | 'delete') => {
+  const handlePermissionChange = (id: string, newPermission: 'Co-Owner' | 'Editor' | 'Viewer' | 'Previewer' | 'Uploader' | 'Previewer/Uploader' | 'Viewer/Uploader' | 'Delete') => {
     setCollaborations(prev =>
       prev.map(collab =>
         collab.id === id
@@ -334,7 +367,10 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
               type="text"
               id="containerId"
               value={searchContainerId}
-              onChange={(e) => setSearchContainerId(e.target.value)}
+              onChange={(e) => {
+                setSearchContainerId(e.target.value);
+                setConfirmedRecertificationId('');
+              }}
               placeholder="Enter container ID to search..."
               className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
@@ -442,17 +478,17 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
                   <td className="px-6 py-4 whitespace-nowrap">
                     <select
                       value={collaboration.permissionLevel}
-                      onChange={(e) => handlePermissionChange(collaboration.id, e.target.value as 'co-owner' | 'editor' | 'viewer' | 'previewer' | 'uploader' | 'previewer_uploader' | 'viewer_uploader' | 'delete')}
+                      onChange={(e) => handlePermissionChange(collaboration.id, e.target.value as 'Co-Owner' | 'Editor' | 'Viewer' | 'Previewer' | 'Uploader' | 'Previewer/Uploader' | 'Viewer/Uploader' | 'Delete')}
                       className="text-sm text-gray-900 border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
-                      <option value="co-owner">Co-Owner</option>
-                      <option value="editor">Editor</option>
-                      <option value="viewer">Viewer</option>
-                      <option value="previewer">Previewer</option>
-                      <option value="uploader">Uploader</option>
-                      <option value="previewer_uploader">Previewer Uploader</option>
-                      <option value="viewer_uploader">Viewer Uploader</option>
-                      <option value="delete">Delete</option>
+                      <option value="Co-Owner">Co-Owner</option>
+                      <option value="Editor">Editor</option>
+                      <option value="Viewer">Viewer</option>
+                      <option value="Previewer">Previewer</option>
+                      <option value="Uploader">Uploader</option>
+                      <option value="Previewer/Uploader">Previewer/Uploader</option>
+                      <option value="Viewer/Uploader">Viewer/Uploader</option>
+                      <option value="Delete">Delete</option>
                     </select>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -550,7 +586,7 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
 
       {/* Success Popup */}
       {showSuccessPopup && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 imp-bg flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
             <div className="flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-full mb-4">
               <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

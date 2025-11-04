@@ -44,9 +44,9 @@ export async function GET(request: NextRequest) {
     },
     });
   } catch (error) {
-    console.error('Error fetching container owner dashboard from api:', error);
+    console.error('Error fetching the list of container owners from api:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch container owner dashboard data' },
+      { error: 'Failed to fetch container owners' },
       { status: 500 }
     );
   }
