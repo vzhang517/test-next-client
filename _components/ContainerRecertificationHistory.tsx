@@ -26,6 +26,7 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchContainerId, setSearchContainerId] = useState<string>('');
+  const [confirmedContainerName, setConfirmedContainerName] = useState<string>('');
   const [confirmedContainerId, setConfirmedContainerId] = useState<string>('');
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const {selectedContainerId, setSelectedContainerId } = useNavigation();
@@ -69,7 +70,7 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
       console.log('Container history data:', data);
       
       // Transform the API data to match our interface
-      const transformedData: RecertificationHistoryEntry[] = data?.map((item: any) => ({
+      const transformedData: RecertificationHistoryEntry[] = data[0].events?.map((item: any) => ({
         id: item.id || 0,
         recertificationId: item.recertification_id || 0,
         actorId: item.actor_id || 0,
@@ -84,6 +85,7 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
 
       setHistoryEntries(transformedData);
       setConfirmedContainerId(containerId);
+      setConfirmedContainerName(data[0].folder_name);
       
       // Auto-expand the most recent year if there are entries
       if (transformedData.length > 0) {
@@ -272,6 +274,10 @@ export default function ContainerRecertificationHistory({ userId, isAdmin }: Con
               <div className="flex-1">
                 <h3 className="text-base font-semibold text-blue-900 mb-1">Currently Viewing History</h3>
                 <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-blue-700">Container Name:</span>
+                  <span className="px-2 py-1 bg-blue-100 text-blue-900 font-mono text-sm rounded border border-blue-200">
+                    {confirmedContainerName}
+                  </span>
                   <span className="text-sm font-medium text-blue-700">Container ID:</span>
                   <span className="px-2 py-1 bg-blue-100 text-blue-900 font-mono text-sm rounded border border-blue-200">
                     {confirmedContainerId}
