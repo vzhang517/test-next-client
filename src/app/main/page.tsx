@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { User } from '@/types/auth';
-import { checkAdmin } from '@/lib/userCheck';
 import { NavigationProvider } from '@/lib/NavigationContext';
 import MainLayout from '@/_components/MainLayout';
 import ContainerRecertification from '@/_components/ContainerRecertification';
@@ -40,7 +39,24 @@ export default function MainPage() {
           return;
         }
 
-        const authenticatedUser = await checkAdmin(userId, userName);
+        const params = new URLSearchParams({
+          userId: userId
+        });
+  
+        const response = await fetch(`/api/admin-check?${params.toString()}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          console.error(`Admin check failed. status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const isAdmin = data.is_admin || false;
+        const authenticatedUser: User = { id: userId, name: userName, isAdmin: isAdmin };
         setUser(authenticatedUser);
         setError(null);
         if (authenticatedUser.isAdmin) {
