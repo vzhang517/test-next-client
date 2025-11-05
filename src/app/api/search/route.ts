@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build the API URL with parameters
-    let apiUrl = `https://nav.ossoccer.com/search/?searchType=${searchType}&value=${value}&startDate=${startDate}&endDate=${endDate}&pageNumber=${pageNumber}&offset=250`;
+    let apiUrl = `https://nav.ossoccer.com/search/?search-type=${searchType}&value=${value}&start-date=${startDate}&end-date=${endDate}&page=${pageNumber}&offset=250`;
   
     // Add export parameter if present
     if (exportParam == 'true') {
