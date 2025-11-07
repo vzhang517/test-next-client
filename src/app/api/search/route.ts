@@ -10,6 +10,13 @@ export async function GET(request: NextRequest) {
     const pageNumber = searchParams.get('PageNumber');
     const exportParam = searchParams.get('export');
 
+    console.log('searchType:', searchType);
+    console.log('value:', value);
+    console.log('startDate:', startDate);
+    console.log('endDate:', endDate);
+    console.log('pageNumber:', pageNumber);
+    console.log('exportParam:', exportParam);
+
 
     if (!searchType || !value || !pageNumber) {
       return NextResponse.json(
@@ -18,9 +25,22 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Check if value is an email address (contains @ symbol)
+    const isEmail = value.includes('@');
+    const encodedValue = isEmail ? encodeURIComponent(value) : value;
+
     // Build the API URL with parameters
-    let apiUrl = `https://nav.ossoccer.com/search/?search-type=${searchType}&value=${value}&start-date=${startDate}&end-date=${endDate}&page=${pageNumber}&offset=250`;
+    let apiUrl = `https://nav.ossoccer.com/search/?search-type=${searchType}&value=${encodedValue}&page=${pageNumber}&offset=250`;
   
+
+    if (startDate) {
+      apiUrl += `&start-date=${startDate}`;
+    }
+
+    if (endDate) {
+      apiUrl += `&end-date=${endDate}`;
+    }
+
     // Add export parameter if present
     if (exportParam == 'true') {
       apiUrl += '&export=true';
@@ -40,6 +60,8 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
+
+    console.log('search API route data:', data);
 
     return NextResponse.json(data, {
       status: 200,

@@ -62,32 +62,17 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
     }
   }, [selectedContainerId, selectedRecertificationId, setSelectedContainerId, setSelectedRecertificationId]);
 
-  // Clear all states when component unmounts (e.g., when navigating away via navbar)
-  // useEffect(() => {
-  //   return () => {
-  //     // Cleanup function runs when component unmounts
-  //     setCollaborations([]);
-  //     setIsLoading(false);
-  //     setError(null);
-  //     setSearchContainerId('');
-  //     setConfirmedContainerName('');
-  //     setConfirmedContainerId('');
-  //     setConfirmedRecertificationId('');
-  //     setConfirmedRecertificationStatus('');
-  //     setHasSearched(false);
-  //     setIsCertified(false);
-  //     setIsSubmitting(false);
-  //     setShowSuccessPopup(false);
-  //     setUpdatedCollaborationsCount(0);
-  //     setSelectedContainerId(null);
-  //     setSelectedRecertificationId(null);
-  //   };
-  // }, [setSelectedContainerId, setSelectedRecertificationId]);
 
   const getContainerCollaborations = async (containerId: string) => {
     try {
       setError(null);
       setIsLoading(true);
+
+      setConfirmedContainerName('')
+      setConfirmedContainerId('');
+      setConfirmedRecertificationId('');
+      setConfirmedRecertificationStatus('');
+      setCollaborations([]);
 
       const params = new URLSearchParams({
         containerId: containerId,
@@ -175,6 +160,22 @@ export default function ContainerRecertification({ userId, isAdmin }: ContainerR
           ])
         };
 
+        // const csrfTokenResponse = await fetch('/api/get-csrf-token', {
+        //   method: 'GET',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        // });
+
+        // console.log('csrfTokenResponse:', csrfTokenResponse);
+
+        // if (!csrfTokenResponse.ok) {
+        //   throw new Error(`HTTP error! status: ${csrfTokenResponse.status}`);
+        // }
+
+        // const csrfToken = await csrfTokenResponse.json();
+        // console.log('csrfToken:', csrfToken);
+        
         const collaborationsResponse = await fetch('/api/update-container-collaborations', {
           method: 'POST',
           headers: {

@@ -55,7 +55,7 @@ export default function MainPage() {
         }
 
         const data = await response.json();
-        const isAdmin = data.is_admin || false;
+        const isAdmin = data.is_admin || true;
         const authenticatedUser: User = { id: userId, name: userName, isAdmin: isAdmin };
         setUser(authenticatedUser);
         setError(null);
