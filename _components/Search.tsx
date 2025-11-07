@@ -192,7 +192,7 @@ export default function Search({ userId, isAdmin }: SearchProps) {
       setIsGeneratingReport(false);
     } catch (error) {
       console.error('Error generating report:', error);
-      setError(error instanceof Error ? error.message : 'Failed to generate report');
+      setError(error instanceof Error ? error.message : 'Failed to generate report, start a new search to restart');
       setIsGeneratingReport(false);
     }
   };
