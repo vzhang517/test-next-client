@@ -27,7 +27,7 @@ export default function Support() {
                 Access instructional videos and comprehensive support documentation to help you navigate the system.
               </p>
               <a
-                href="https://cloud.app.box.com/folder/298811706070"
+                href={process.env.NEXT_PUBLIC_SUPPORT_FOLDER_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"

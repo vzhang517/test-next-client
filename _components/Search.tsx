@@ -78,6 +78,7 @@ export default function Search({ userId, isAdmin }: SearchProps) {
       }
 
       const data = await response.json();
+      console.log('data:', data);
       
       // Handle array or object response
       if (Array.isArray(data)) {
@@ -312,23 +313,23 @@ export default function Search({ userId, isAdmin }: SearchProps) {
 
     // Define columns based on search type
     const userIDColumns = [
-      'owner_id',
+      'id',
+      'collaborator_name',
+      'collaborator_login',
       'owner_name',
       'owner_login',
       'path_ids',
       'item_id',
       'item_type',
-      'collaborator_id',
-      'collaborator_name',
-      'collaborator_login',
-      'collaborator_type',
-      'collaborator_permission'
+      'collaborator_permission',
+      'invited_date',
+      'collaboration_id',
     ];
 
     const statusColumns = [
       'container_folder_id',
       'status',
-      'primary_container_owner_ids',
+      'primary_container_owner_id',
       'due_date',
       'completed_date',
       'next_recert_date'
@@ -462,7 +463,7 @@ export default function Search({ userId, isAdmin }: SearchProps) {
                   value={value}
                   onChange={(e) => setValue(e.target.value)}
                   className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Enter User ID or Email"
+                  placeholder="Enter User Email ex: john.doe@example.com"
                 />
               ) : (
                 <select
