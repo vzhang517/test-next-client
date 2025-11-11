@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build the API URL with sorting parameters
-    let apiUrl = `https://nav.ossoccer.com/get_container_owner_dashboard/?user-id=${userId}`;
+    let apiUrl = `${process.env.API_URL}/get_container_owner_dashboard/?user-id=${userId}`;
     
     if (column) {
       apiUrl += `&column=${column}`;

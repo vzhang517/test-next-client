@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     console.log(updateData);
 
 
-    const updateResponse = await fetch('https://nav.ossoccer.com/email_template_edit/', {
+    const updateResponse = await fetch(`${process.env.API_URL}/email_template_edit/`, {
       method: 'POST',
       credentials: 'include',
       headers: {

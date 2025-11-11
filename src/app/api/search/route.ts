@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     const encodedValue = isEmail ? encodeURIComponent(value) : value;
 
     // Build the API URL with parameters
-    let apiUrl = `https://nav.ossoccer.com/search/?search-type=${searchType}&value=${encodedValue}&page=${pageNumber}&offset=250`;
+    let apiUrl = `${process.env.API_URL}/search/?search-type=${searchType}&value=${encodedValue}&page=${pageNumber}&offset=250`;
   
 
     if (startDate) {

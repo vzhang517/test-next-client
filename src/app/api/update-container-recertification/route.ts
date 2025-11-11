@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Sending update data to API:', updateData);
 
-    const updateResponse = await fetch('https://nav.ossoccer.com/update_container_recertification/', {
+    const updateResponse = await fetch(`${process.env.API_URL}/update_container_recertification/`, {
       method: 'POST',
       credentials: 'include',
       headers: {

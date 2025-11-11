@@ -4,7 +4,7 @@ export async function GET(request: NextRequest) {
   try {
 
     // Build the API URL with sorting parameters
-    let apiUrl = `https://nav.ossoccer.com/list_email_templates/`;
+    let apiUrl = `${process.env.API_URL}/list_email_templates/`;
 
 
 

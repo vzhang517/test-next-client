@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
 
-    let apiUrl = `https://nav.ossoccer.com/get_csrf_token/`;
+    let apiUrl = `${process.env.API_URL}/get_csrf_token/`;
     
 
     console.log('apiUrl:', apiUrl);

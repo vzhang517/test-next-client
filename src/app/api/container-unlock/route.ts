@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build the API URL with sorting parameters
-    let apiUrl = `https://nav.ossoccer.com/container_unlock/?user-id=${userId}&container-id=${containerId}`;
+    let apiUrl = `${process.env.API_URL}/container_unlock/?user-id=${userId}&container-id=${containerId}`;
 
 
     console.log('apiUrl:', apiUrl);

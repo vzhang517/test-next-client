@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build the API URL with sorting parameters
-    let apiUrl = `https://nav.ossoccer.com/list_container_ownership/?container-id=${containerId}&user-id=${userId}`;
+    let apiUrl = `${process.env.API_URL}/list_container_ownership/?container-id=${containerId}&user-id=${userId}`;
 
     // Add export parameter if present
     if (includeEditor === 'true') {

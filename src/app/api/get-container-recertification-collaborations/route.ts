@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build the API URL with sorting parameters
-    let apiUrl = `https://nav.ossoccer.com/container/${containerId}/collaborations/?user-id=${userId}`;
+    let apiUrl = `${process.env.API_URL}/container/${containerId}/collaborations/?user-id=${userId}`;
 
     // Add recertificationId parameter if present
     if (recertificationId) {

@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     console.log('Sending update data to API:', updateData);
 
-    let tokenUrl = `https://nav.ossoccer.com/get_csrf_token/`;
+    let tokenUrl = `${process.env.API_URL}/get_csrf_token/`;
     
 
     console.log('apiUrl:', tokenUrl);
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const csrfToken = await csrfTokenResponse.json();
     console.log('csrfToken:', csrfToken.csrfToken);
 
-    const updateResponse = await fetch('https://nav.ossoccer.com/update_container_collaborations/', {
+    const updateResponse = await fetch(`${process.env.API_URL}/update_container_collaborations/`, {
       method: 'POST',
       credentials: 'include',
       headers: {

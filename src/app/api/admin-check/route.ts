@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build the API URL with parameters
-    let apiUrl = `https://nav.ossoccer.com/admin_check/?&user-id=${userId}`;
+    let apiUrl = `${process.env.API_URL}/admin_check/?&user-id=${userId}`;
 
     console.log('apiUrl:', apiUrl);
 

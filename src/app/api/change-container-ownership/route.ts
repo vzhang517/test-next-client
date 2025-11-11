@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     };
 
 
-    const updateResponse = await fetch('https://nav.ossoccer.com/change_container_ownership/', {
+    const updateResponse = await fetch('${process.env.API_URL}/change_container_ownership/', {
       method: 'POST',
       credentials: 'include',
       headers: {

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     
-    let apiUrl = `https://nav.ossoccer.com/get_email_template/${templateId}/?user-id=${userId}`;
+    let apiUrl = `${process.env.API_URL}/get_email_template/${templateId}/?user-id=${userId}`;
     
 
     console.log('apiUrl:', apiUrl);
