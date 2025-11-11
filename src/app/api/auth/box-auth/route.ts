@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
       );
     }
     console.log('Creating OAuth config...');
+    console.log('BOX_CLIENT_ID:', process.env.BOX_CLIENT_ID);
     const config = new OAuthConfig({
       clientId: process.env.BOX_CLIENT_ID!,
       clientSecret: process.env.BOX_CLIENT_SECRET!,
