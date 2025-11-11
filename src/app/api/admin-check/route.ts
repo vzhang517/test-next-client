@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build the API URL with parameters
-    let apiUrl = `${process.env.API_URL}/admin_check/?&user-id=${userId}`;
+    let apiUrl = `${process.env.API_URL}/admin_check/?user-id=${userId}`;
 
     console.log('apiUrl:', apiUrl);
 
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
 
-    console.log('admin check data:', data);
+    console.log('data:', data);
 
     return NextResponse.json(data, {
       status: 200,
