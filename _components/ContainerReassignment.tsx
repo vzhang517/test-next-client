@@ -35,6 +35,7 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
   const [ownershipChangeStatus, setOwnershipChangeStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [isChangingOwnership, setIsChangingOwnership] = useState<boolean>(false);
   const [isUnlocking, setIsUnlocking] = useState<boolean>(false);
+  const [confirmedRecertificationId, setConfirmedRecertificationId] = useState<string>('');
 
   const getContainerInfo = async (containerId: string) => {
     try {
@@ -69,6 +70,7 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
         primaryContainerOwner: data[0].container.primary_container_owner || '',
       };
 
+      setConfirmedRecertificationId(data[0].container.container_recertification_id?.toString() || '');
       setConfirmedContainerName(data[0].container.folder_name || '');
       setContainerInfo(transformedData);
       setCollaborators(data[0].collaborators || []);
@@ -96,7 +98,8 @@ export default function ContainerReassignment({ userId, isAdmin }: ContainerReas
 
       const params = new URLSearchParams({
         userId: userId,
-        containerId: confirmedContainerId
+        containerId: confirmedContainerId,
+        recertificationId: confirmedRecertificationId
       });
 
       const response = await fetch(`/api/container-unlock?${params.toString()}`, {

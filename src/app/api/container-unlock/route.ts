@@ -5,6 +5,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
     const containerId = searchParams.get('containerId');
+    const recertificationId = searchParams.get('recertificationId');
 
 
     if (!userId) {
@@ -16,6 +17,10 @@ export async function GET(request: NextRequest) {
 
     // Build the API URL with sorting parameters
     let apiUrl = `${process.env.API_URL}/container_unlock/?user-id=${userId}&container-id=${containerId}`;
+
+    if (recertificationId) {
+      apiUrl += `&recertification-id=${recertificationId}`;
+    }
 
 
     console.log('apiUrl:', apiUrl);
