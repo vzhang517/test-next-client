@@ -6,6 +6,9 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get('userId');
     const column = searchParams.get('column');
     const order = searchParams.get('order');
+    const api_url = process.env.API_URL;
+
+    console.log('api_url:', api_url);
 
     if (!userId) {
       return NextResponse.json(
@@ -15,7 +18,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build the API URL with sorting parameters
-    let apiUrl = `${process.env.API_URL}/get_container_owner_dashboard/?user-id=${userId}`;
+    let apiUrl = `${api_url}/get_container_owner_dashboard/?user-id=${userId}`;
     
     if (column) {
       apiUrl += `&column=${column}`;
