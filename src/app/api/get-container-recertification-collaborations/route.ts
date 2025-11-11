@@ -22,8 +22,6 @@ export async function GET(request: NextRequest) {
       apiUrl += `&recertification-id=${recertificationId}`;
     }
 
-    console.log('apiUrl:', apiUrl);
-
     const response = await fetch(apiUrl, {
       method: 'GET',
       headers: {

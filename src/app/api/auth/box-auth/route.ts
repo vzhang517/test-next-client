@@ -3,11 +3,8 @@ import { BoxClient, BoxOAuth, OAuthConfig} from 'box-typescript-sdk-gen';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('testing api');
     const body = await request.json();
-    console.log('body:', body);
     const authCode = body.auth_code;
-    console.log('authCode:', authCode);
 
     if (!authCode) { 
       return NextResponse.json(
@@ -16,7 +13,7 @@ export async function POST(request: NextRequest) {
       );
     }
     console.log('Creating OAuth config...');
-    console.log('BOX_CLIENT_ID:', process.env.BOX_CLIENT_ID);
+
     const config = new OAuthConfig({
       clientId: process.env.BOX_CLIENT_ID!,
       clientSecret: process.env.BOX_CLIENT_SECRET!,
