@@ -11,7 +11,6 @@ import ContainerReassignment from '@/_components/ContainerReassignment';
 import EmailTemplates from '@/_components/EmailTemplates';
 import Support from '@/_components/Support';
 import Search from '@/_components/Search';
-import { deserializeFolderFullAllowedSharedLinkAccessLevelsField } from 'box-node-sdk/lib/schemas/folderFull';
 export default function MainPage() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,14 +56,11 @@ export default function MainPage() {
 
         const data = await response.json();
         const isAdmin = data.is_admin || false;
+        console.log('isAdmin:', isAdmin);
         const authenticatedUser: User = { id: userId, name: userName, isAdmin: isAdmin };
         setUser(authenticatedUser);
         setError(null);
-        if (authenticatedUser.isAdmin) {
-          setCurrentSection('admin');
-        } else {
-          setCurrentSection('container-owner');
-        }
+        setCurrentSection('container-owner');
         setIsLoading(false);
       } catch (error) {
         console.error('Box authentication error:', error);

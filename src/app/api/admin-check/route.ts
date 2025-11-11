@@ -32,6 +32,8 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
 
+    console.log('admin check data:', data);
+
     return NextResponse.json(data, {
       status: 200,
       headers: {
