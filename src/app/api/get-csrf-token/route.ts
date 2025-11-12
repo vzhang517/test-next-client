@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,6 +21,10 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
+
+    const cookieStore = await cookies()
+
+    cookieStore.set('csrfToken', data.csrfToken);
 
     return NextResponse.json(data, {
       status: 200,

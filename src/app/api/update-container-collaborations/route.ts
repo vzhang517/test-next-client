@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { getCsrfToken } from 'next-auth/react';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,32 +24,34 @@ export async function POST(request: NextRequest) {
 
     console.log('Sending update data to API:', updateData);
 
-    let tokenUrl = `${process.env.API_URL}/get_csrf_token/`;
+    // let tokenUrl = `${process.env.API_URL}/get_csrf_token/`;
     
 
-    console.log('apiUrl:', tokenUrl);
+    // console.log('apiUrl:', tokenUrl);
 
-    const csrfTokenResponse = await fetch(tokenUrl, {
-      method: 'GET',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    // const csrfTokenResponse = await fetch(tokenUrl, {
+    //   method: 'GET',
+    //   credentials: 'include',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Referer': process.env.API_URL || '',
+    //   },
+    // });
 
-    if (!csrfTokenResponse.ok) {
-      throw new Error(`Token fetch error! status: ${csrfTokenResponse.status}`);
-    }
+    // if (!csrfTokenResponse.ok) {
+    //   throw new Error(`Token fetch error! status: ${csrfTokenResponse.status}`);
+    // }
 
-    const csrfToken = await csrfTokenResponse.json();
-    console.log('csrfToken:', csrfToken.csrfToken);
+    // const csrfTokenData = await csrfTokenResponse.json();
+
+    // const cookieStore = await cookies()
+    // const csrfToken = getCsrfToken();
 
     const updateResponse = await fetch(`${process.env.API_URL}/update_container_collaborations/`, {
       method: 'POST',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken.csrfToken,
       },
       body: JSON.stringify(updateData),
     });
