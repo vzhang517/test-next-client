@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('userId');
 
-    console.log('userId:', userId);
+    console.log('userId in admin check route:', userId);
 
     if (!userId) {
       return NextResponse.json(

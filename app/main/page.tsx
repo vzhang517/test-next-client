@@ -33,6 +33,9 @@ export default function MainPage() {
         const userId = sessionStorage.getItem('userID');
         const userName = sessionStorage.getItem('userName');
 
+        console.log('userId in main page:', userId);
+        console.log('userName in main page:', userName);
+
         if (!userId || !userName) {
           setError('User ID or user name not found');
           setIsLoading(false);
