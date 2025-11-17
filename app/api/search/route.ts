@@ -9,13 +9,9 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('endDate');
     const pageNumber = searchParams.get('PageNumber');
     const exportParam = searchParams.get('export');
+    const userId = searchParams.get('userId');
 
-    console.log('searchType:', searchType);
-    console.log('value:', value);
-    console.log('startDate:', startDate);
-    console.log('endDate:', endDate);
-    console.log('pageNumber:', pageNumber);
-    console.log('exportParam:', exportParam);
+    console.log('search route userId:', userId);
 
 
     if (!searchType || !value || !pageNumber) {
@@ -30,7 +26,7 @@ export async function GET(request: NextRequest) {
     const encodedValue = isEmail ? encodeURIComponent(value) : value;
 
     // Build the API URL with parameters
-    let apiUrl = `${process.env.API_URL}/search/?search-type=${searchType}&value=${encodedValue}&page=${pageNumber}&offset=250`;
+    let apiUrl = `${process.env.API_URL}/search/?search-type=${searchType}&value=${encodedValue}&user-id=${userId}&page=${pageNumber}&offset=250}`;
   
 
     if (startDate) {

@@ -54,6 +54,7 @@ export default function Search({ userId, isAdmin }: SearchProps) {
       const params = new URLSearchParams({
         searchType: searchType,
         value: encodedValue,
+        userId: userId,
         PageNumber: '1',
       });
 
@@ -148,6 +149,7 @@ export default function Search({ userId, isAdmin }: SearchProps) {
       const params = new URLSearchParams({
         searchType: searchType,
         value: encodedValue,
+        userId: userId,
         PageNumber: '1',
         export: 'true',
       });
