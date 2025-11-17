@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const encodedValue = isEmail ? encodeURIComponent(value) : value;
 
     // Build the API URL with parameters
-    let apiUrl = `${process.env.API_URL}/search/?search-type=${searchType}&value=${encodedValue}&user-id=${userId}&page=${pageNumber}&offset=250}`;
+    let apiUrl = `${process.env.API_URL}/search/?search-type=${searchType}&value=${encodedValue}&user-id=${userId}&page=${pageNumber}&offset=250`;
   
 
     if (startDate) {
