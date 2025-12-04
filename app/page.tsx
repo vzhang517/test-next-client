@@ -47,10 +47,6 @@ function HomeContent() {
 
         sessionStorage.setItem('userID', userData.id);
         sessionStorage.setItem('userName', userData.name);
-
-
-        // sessionStorage.setItem('userID', '45342655132');
-        // sessionStorage.setItem('userName', 'Erik Lane');
         
 
         // Set authenticated state to show success message
