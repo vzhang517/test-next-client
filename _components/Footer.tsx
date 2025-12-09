@@ -11,14 +11,6 @@ export default function Footer({ onSupportClick }: FooterProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <img 
-              src="/Box.svg" 
-              alt="State Street" 
-              className="h-8 w-auto"
-            />
-            <span className="text-sm text-gray-500">
-              Container Recertification System
-            </span>
           </div>
           
           <button
