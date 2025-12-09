@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Check if the request is for an API route
   if (request.nextUrl.pathname.startsWith('/api/')) {
     // Check if this is a browser navigation request (has text/html in Accept header)
