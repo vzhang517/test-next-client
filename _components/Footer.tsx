@@ -12,7 +12,7 @@ export default function Footer({ onSupportClick }: FooterProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <img 
-              src="/State-street-logo-final.svg" 
+              src="/Box.svg" 
               alt="State Street" 
               className="h-8 w-auto"
             />
